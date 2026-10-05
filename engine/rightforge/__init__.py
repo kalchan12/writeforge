@@ -9,6 +9,7 @@ from rightforge.analysis import (
     LinguisticAnalyzer,
     PunctuationAnalyzer,
     SentenceAnalyzer,
+    StylometryAnalyzer,
 )
 from rightforge.models import AnalysisResult, Document, MetricResult
 
@@ -23,4 +24,5 @@ __all__ = [
     "MetricResult",
     "PunctuationAnalyzer",
     "SentenceAnalyzer",
+    "StylometryAnalyzer",
 ]
