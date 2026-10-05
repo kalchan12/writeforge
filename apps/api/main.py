@@ -9,8 +9,13 @@ from rightforge.analysis import (
     LinguisticAnalyzer,
     StylometryAnalyzer,
 )
-from rightforge.models import AnalysisResult, AuthorProfile, Document
-from rightforge.profiles import ProfileAggregator
+from rightforge.models import (
+    AnalysisResult,
+    AuthorProfile,
+    ConsistencyReport,
+    Document,
+)
+from rightforge.profiles import ProfileAggregator, ProfileComparator
 
 app = FastAPI(
     title="RightForge API",
@@ -52,6 +57,22 @@ class CreateProfileRequest(BaseModel):
     )
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Optional profile metadata"
+    )
+
+
+class CompareProfileRequest(BaseModel):
+    """Request payload for comparing a document against an author profile."""
+
+    profile: AuthorProfile = Field(..., description="Target reference AuthorProfile")
+    text: str = Field(..., min_length=1, description="Document text to evaluate")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Optional document metadata"
+    )
+    outlier_threshold: float = Field(
+        default=2.0,
+        ge=0.5,
+        le=5.0,
+        description="Standard deviation threshold for outlier identification",
     )
 
 
@@ -98,4 +119,16 @@ def create_profile(request: CreateProfileRequest) -> AuthorProfile:
         author_name=request.author_name,
         documents=docs,
         metadata=request.metadata,
+    )
+
+
+@app.post("/profiles/compare", response_model=ConsistencyReport)
+def compare_profile(request: CompareProfileRequest) -> ConsistencyReport:
+    """Evaluate document alignment and consistency score relative to an AuthorProfile."""
+    doc = Document(text=request.text, metadata=request.metadata)
+    comparator = ProfileComparator()
+    return comparator.compare(
+        profile=request.profile,
+        target=doc,
+        outlier_threshold=request.outlier_threshold,
     )
