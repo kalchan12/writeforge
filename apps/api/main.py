@@ -2,7 +2,10 @@
 
 from typing import Any
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from rightforge.analysis import BasicTextAnalyzer
+from rightforge.models import AnalysisResult, Document
 
 app = FastAPI(
     title="RightForge API",
@@ -19,6 +22,15 @@ class HealthResponse(BaseModel):
     version: str
 
 
+class BasicAnalysisRequest(BaseModel):
+    """Request payload for basic document analysis."""
+
+    text: str = Field(..., description="The input text content to analyze")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Optional metadata attributes"
+    )
+
+
 @app.get("/health", response_model=HealthResponse)
 def get_health() -> dict[str, Any]:
     """Basic health check endpoint confirming the API service is operational."""
@@ -27,3 +39,11 @@ def get_health() -> dict[str, Any]:
         "service": "rightforge-api",
         "version": "0.1.0",
     }
+
+
+@app.post("/analysis/basic", response_model=AnalysisResult)
+def analyze_basic(request: BasicAnalysisRequest) -> AnalysisResult:
+    """Analyze a document and compute deterministic surface text statistics."""
+    doc = Document(text=request.text, metadata=request.metadata)
+    analyzer = BasicTextAnalyzer()
+    return analyzer.analyze(doc)
