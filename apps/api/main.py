@@ -1,7 +1,6 @@
-"""FastAPI entrypoint for the RightForge application."""
-
+import os
 from typing import Any
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from rightforge.analysis import (
@@ -24,12 +23,16 @@ from rightforge.models import (
 )
 from rightforge.profiles import ProfileAggregator, ProfileComparator
 from rightforge.revision import RevisionExecutor, RevisionPlanner
+from rightforge.storage import DatabaseManager
 
 app = FastAPI(
     title="RightForge API",
     description="Local-first writing analysis and author-style research platform API",
     version="0.1.0",
 )
+
+db_path = os.environ.get("RIGHTFORGE_DB_PATH", "data/writeforge.db")
+db = DatabaseManager(db_path=db_path)
 
 
 class HealthResponse(BaseModel):
@@ -177,14 +180,31 @@ def analyze_perplexity(request: TextAnalysisRequest) -> PerplexityReport:
 
 @app.post("/profiles/create", response_model=AuthorProfile)
 def create_profile(request: CreateProfileRequest) -> AuthorProfile:
-    """Construct an AuthorProfile with metric baselines aggregated across author documents."""
+    """Construct an AuthorProfile with metric baselines aggregated across author documents and persist it."""
     docs = [Document(text=d.text, metadata=d.metadata) for d in request.documents]
     aggregator = ProfileAggregator()
-    return aggregator.create_profile(
+    profile = aggregator.create_profile(
         author_name=request.author_name,
         documents=docs,
         metadata=request.metadata,
     )
+    db.save_profile(profile)
+    return profile
+
+
+@app.get("/profiles", response_model=list[AuthorProfile])
+def list_profiles() -> list[AuthorProfile]:
+    """Retrieve all persisted AuthorProfiles from local storage."""
+    return db.list_profiles()
+
+
+@app.get("/profiles/{profile_id}", response_model=AuthorProfile)
+def get_profile(profile_id: str) -> AuthorProfile:
+    """Retrieve a specific AuthorProfile by identifier."""
+    profile = db.get_profile(profile_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Author profile not found")
+    return profile
 
 
 @app.post("/profiles/compare", response_model=ConsistencyReport)
@@ -213,7 +233,7 @@ def plan_revision(request: RevisionPlanRequest) -> RevisionPlan:
 
 @app.post("/revision/execute", response_model=RevisionExecutionResult)
 def execute_revision(request: RevisionExecuteRequest) -> RevisionExecutionResult:
-    """Execute a style-conditioned revision via local LLM and verify metric shifts."""
+    """Execute a style-conditioned revision via local LLM, verify metric shifts, and log execution."""
     doc = Document(text=request.text, metadata=request.metadata)
     if request.use_mock:
         provider = MockLLMProvider()
@@ -224,8 +244,17 @@ def execute_revision(request: RevisionExecuteRequest) -> RevisionExecutionResult
         )
 
     executor = RevisionExecutor(provider=provider)
-    return executor.execute(
+    result = executor.execute(
         target=doc,
         profile=request.profile,
         outlier_threshold=request.outlier_threshold,
     )
+    if result.success:
+        db.log_revision(result)
+    return result
+
+
+@app.get("/revision/logs", response_model=list[dict[str, Any]])
+def list_revision_logs() -> list[dict[str, Any]]:
+    """Retrieve historical revision execution audit logs."""
+    return db.list_revision_logs()

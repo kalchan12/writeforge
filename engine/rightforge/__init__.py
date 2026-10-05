@@ -45,6 +45,7 @@ from rightforge.models import (
 )
 from rightforge.profiles import ProfileAggregator, ProfileComparator
 from rightforge.revision import RevisionExecutor, RevisionPlanner
+from rightforge.storage import DatabaseManager
 
 __all__ = [
     "__version__",
@@ -55,6 +56,7 @@ __all__ = [
     "BaseProbabilityModel",
     "BasicTextAnalyzer",
     "ConsistencyReport",
+    "DatabaseManager",
     "Document",
     "FEATURE_NAMES",
     "HuggingFaceProbabilityModel",

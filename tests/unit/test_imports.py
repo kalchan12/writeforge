@@ -24,6 +24,7 @@ def test_package_exports() -> None:
     assert hasattr(rightforge, "RevisionPlan")
     assert hasattr(rightforge, "RevisionExecutor")
     assert hasattr(rightforge, "RevisionExecutionResult")
+    assert hasattr(rightforge, "DatabaseManager")
 
 
 def test_api_app_instantiated() -> None:
