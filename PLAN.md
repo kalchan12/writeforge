@@ -77,30 +77,37 @@ RightForge is a local-first writing analysis and author-style research platform.
 - [x] **API Endpoint**: `POST /revision/plan` returning `RevisionPlan`.
 - [x] **Tests & Documentation**: Added unit and integration tests (**104 tests total, 100% passing**). Created `docs/specifications/REVISION.md` and updated `docs/ai/ARCHITECTURE.md`.
 
+### Phase 10 — Local LLM Integration
+- [x] **LLM Provider Abstraction**: `BaseLLMProvider` (ABC), `MockLLMProvider` (deterministic testing), and `OllamaProvider` (local HTTP daemon) in `engine/rightforge/llm/`.
+- [x] **Prompt Engineering Engine**: `RevisionPromptBuilder` in `engine/rightforge/llm/prompts.py` enforcing strict style conditioning, factual preservation, and anti-hallucination guardrails.
+- [x] **Revision Execution & Verification Pipeline**: `RevisionExecutor` in `engine/rightforge/revision/executor.py` running style-conditioned revision and computing pre- and post-revision metric snapshots (`RevisionExecutionResult`).
+- [x] **API Endpoint**: `POST /revision/execute` returning `RevisionExecutionResult`.
+- [x] **Tests & Documentation**: Added unit and integration tests (**116 tests total, 100% passing**). Created `docs/specifications/LLM_INTEGRATION.md` and updated `docs/ai/ARCHITECTURE.md`.
+
 ---
 
 ## 3. Current State
 
-- **Active Phase**: Phase 9 Complete.
-- **Engine**: Pure-Python analysis, profiling, comparison, ML vectorization, deterministic perplexity/burstiness, and controlled revision planning.
-- **Tests**: 104 passed in pytest in ~2.6s.
-- **Service**: 8 FastAPI endpoints operational.
+- **Active Phase**: Phase 10 Complete.
+- **Engine**: Pure-Python analysis, profiling, comparison, ML vectorization, deterministic perplexity/burstiness, revision planning, and local LLM execution.
+- **Tests**: 116 passed in pytest in ~2.8s.
+- **Service**: 9 FastAPI endpoints operational.
 - **Research**: EXP-001 (authorship classification) and EXP-002 (perplexity & burstiness) benchmark harnesses operational.
 
 ---
 
 ## 4. Known Limitations
 
-- **No LLM Integration Yet**: Revision plans generate prescriptive guidance and diagnostic targets; automated execution via local LLMs is scheduled for Phase 10.
+- **Frontend Integration Pending**: Full Next.js Web UI connecting all 9 backend endpoints into an interactive writing dashboard is scheduled for Phase 11.
 - **No Persistence**: Storage remains in-memory.
 
 ---
 
-## 5. Next Milestone: Phase 10 — Local LLM Integration
+## 5. Next Milestone: Phase 11 — Web UI & Research Dashboard
 
-The next bounded objective will implement local inference orchestration:
-1. **Local LLM Provider Abstraction**: `BaseLLMProvider` in `engine/rightforge/llm/base.py` and `OllamaProvider` in `engine/rightforge/llm/ollama.py`.
-2. **Prompt Template Engine**: Structured prompt generation in `engine/rightforge/llm/prompts.py` translating `RevisionPlan` into strict style-conditioned revision instructions.
-3. **Execution Pipeline**: `RevisionExecutor` in `engine/rightforge/revision/executor.py` executing controlled revisions and verifying candidate output against `AuthorProfile`.
-4. **API Endpoint**: `POST /revision/execute` with fallback for offline environments.
-5. **Deterministic Tests & Documentation**: Mock-backed integration and unit tests.
+The next bounded objective will implement the local-first web interface:
+1. **Interactive Text Editor**: Dynamic document input with live metric cards (surface statistics, readability, vocabulary richness).
+2. **Author Profile Visualizer**: Radar/bar distribution charts comparing document metrics against author baselines and showing outlier flags.
+3. **Burstiness & Perplexity Graph**: Sentence-by-sentence perplexity progression chart showing cadence peaks and uniform regions.
+4. **Controlled Revision Workbench**: Interactive panel displaying revision goals, sentence-level interventions, side-by-side comparison, and one-click execution.
+5. **E2E & Component Tests**: Next.js testing for API client and interactive components.

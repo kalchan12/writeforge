@@ -55,12 +55,17 @@ Strict rules govern dependencies within the repository:
 * `engine/rightforge/analysis/`:
   * `perplexity.py`: `PerplexityAnalyzer` computing sentence perplexity trajectories and burstiness ($CV = \sigma / \mu$).
   * Modular deterministic text analyzers: basic, lexical, sentence, punctuation, stylometry, semantics, and perplexity.
+* `engine/rightforge/llm/`:
+  * `base.py`: `BaseLLMProvider` (ABC) and `MockLLMProvider` for deterministic testing.
+  * `ollama.py`: `OllamaProvider` connecting to local inference daemons over HTTP.
+  * `prompts.py`: `RevisionPromptBuilder` formatting style-conditioned prompts and anti-hallucination guardrails.
 * `engine/rightforge/revision/`:
   * `planner.py`: `RevisionPlanner` formulating rule-governed revision goals and granular sentence interventions (`RevisionPlan`).
+  * `executor.py`: `RevisionExecutor` executing style-conditioned LLM revisions and conducting pre/post metric verification (`RevisionExecutionResult`).
 * `scripts/`:
   * `evaluate_perplexity.py`: Perplexity and burstiness evaluation across diverse and synthetic text genres (EXP-002).
   * `evaluate_classifier.py`: Cross-validation classification harness testing stylistic discrimination (EXP-001).
-* `apps/api/main.py`: RESTful endpoints for basic, linguistic, stylometric, coherence, perplexity, and revision planning, alongside profile creation and comparison.
+* `apps/api/main.py`: RESTful endpoints for basic, linguistic, stylometric, coherence, perplexity, and revision planning/execution, alongside profile creation and comparison.
 
 ## 5. Future Target Architecture (Reference Only)
 

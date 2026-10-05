@@ -22,6 +22,8 @@ def test_package_exports() -> None:
     assert hasattr(rightforge, "PerplexityReport")
     assert hasattr(rightforge, "RevisionPlanner")
     assert hasattr(rightforge, "RevisionPlan")
+    assert hasattr(rightforge, "RevisionExecutor")
+    assert hasattr(rightforge, "RevisionExecutionResult")
 
 
 def test_api_app_instantiated() -> None:

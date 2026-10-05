@@ -2,6 +2,7 @@
 
 from rightforge.models.comparison import ConsistencyReport, MetricDeviation
 from rightforge.models.document import AnalysisResult, Document, MetricResult
+from rightforge.models.execution import RevisionExecutionResult
 from rightforge.models.profile import AuthorProfile, MetricBaseline
 from rightforge.models.revision import RevisionGoal, RevisionPlan, SentenceRevisionTarget
 from rightforge.models.semantics import SemanticCoherenceReport, TransitionScore
@@ -16,6 +17,7 @@ __all__ = [
     "MetricDeviation",
     "MetricResult",
     "PerplexityReport",
+    "RevisionExecutionResult",
     "RevisionGoal",
     "RevisionPlan",
     "SemanticCoherenceReport",

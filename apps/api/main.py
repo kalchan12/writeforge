@@ -11,17 +11,19 @@ from rightforge.analysis import (
     SemanticCoherenceAnalyzer,
     StylometryAnalyzer,
 )
+from rightforge.llm import MockLLMProvider, OllamaProvider
 from rightforge.models import (
     AnalysisResult,
     AuthorProfile,
     ConsistencyReport,
     Document,
     PerplexityReport,
+    RevisionExecutionResult,
     RevisionPlan,
     SemanticCoherenceReport,
 )
 from rightforge.profiles import ProfileAggregator, ProfileComparator
-from rightforge.revision import RevisionPlanner
+from rightforge.revision import RevisionExecutor, RevisionPlanner
 
 app = FastAPI(
     title="RightForge API",
@@ -98,6 +100,29 @@ class RevisionPlanRequest(BaseModel):
         le=5.0,
         description="Standard deviation threshold for outlier identification",
     )
+
+
+class RevisionExecuteRequest(BaseModel):
+    """Request payload for executing an automated style-conditioned revision."""
+
+    text: str = Field(..., min_length=1, description="Document text to revise")
+    profile: AuthorProfile | None = Field(
+        default=None, description="Optional target AuthorProfile"
+    )
+    model: str = Field(
+        default="llama3", description="Local LLM model name (e.g. llama3, mistral, qwen2.5)"
+    )
+    endpoint_url: str = Field(
+        default="http://localhost:11434", description="Base URL of the local inference daemon"
+    )
+    use_mock: bool = Field(
+        default=False,
+        description="Whether to use deterministic mock execution (for testing and offline runs)",
+    )
+    outlier_threshold: float = Field(
+        default=2.0, ge=0.5, le=5.0, description="Outlier threshold for profile comparison"
+    )
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -180,6 +205,26 @@ def plan_revision(request: RevisionPlanRequest) -> RevisionPlan:
     doc = Document(text=request.text, metadata=request.metadata)
     planner = RevisionPlanner()
     return planner.generate_plan(
+        target=doc,
+        profile=request.profile,
+        outlier_threshold=request.outlier_threshold,
+    )
+
+
+@app.post("/revision/execute", response_model=RevisionExecutionResult)
+def execute_revision(request: RevisionExecuteRequest) -> RevisionExecutionResult:
+    """Execute a style-conditioned revision via local LLM and verify metric shifts."""
+    doc = Document(text=request.text, metadata=request.metadata)
+    if request.use_mock:
+        provider = MockLLMProvider()
+    else:
+        provider = OllamaProvider(
+            model=request.model,
+            base_url=request.endpoint_url,
+        )
+
+    executor = RevisionExecutor(provider=provider)
+    return executor.execute(
         target=doc,
         profile=request.profile,
         outlier_threshold=request.outlier_threshold,

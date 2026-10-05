@@ -13,6 +13,12 @@ from rightforge.analysis import (
     SentenceAnalyzer,
     StylometryAnalyzer,
 )
+from rightforge.llm import (
+    BaseLLMProvider,
+    MockLLMProvider,
+    OllamaProvider,
+    RevisionPromptBuilder,
+)
 from rightforge.ml import (
     FEATURE_NAMES,
     BaseProbabilityModel,
@@ -29,6 +35,7 @@ from rightforge.models import (
     MetricDeviation,
     MetricResult,
     PerplexityReport,
+    RevisionExecutionResult,
     RevisionGoal,
     RevisionPlan,
     SemanticCoherenceReport,
@@ -37,13 +44,14 @@ from rightforge.models import (
     TransitionScore,
 )
 from rightforge.profiles import ProfileAggregator, ProfileComparator
-from rightforge.revision import RevisionPlanner
+from rightforge.revision import RevisionExecutor, RevisionPlanner
 
 __all__ = [
     "__version__",
     "AnalysisResult",
     "AuthorProfile",
     "BaseAnalyzer",
+    "BaseLLMProvider",
     "BaseProbabilityModel",
     "BasicTextAnalyzer",
     "ConsistencyReport",
@@ -55,15 +63,20 @@ __all__ = [
     "MetricBaseline",
     "MetricDeviation",
     "MetricResult",
+    "MockLLMProvider",
     "NgramProbabilityModel",
+    "OllamaProvider",
     "PerplexityAnalyzer",
     "PerplexityReport",
     "ProfileAggregator",
     "ProfileComparator",
     "PunctuationAnalyzer",
+    "RevisionExecutionResult",
+    "RevisionExecutor",
     "RevisionGoal",
     "RevisionPlan",
     "RevisionPlanner",
+    "RevisionPromptBuilder",
     "SemanticCoherenceAnalyzer",
     "SemanticCoherenceReport",
     "SentenceAnalyzer",
