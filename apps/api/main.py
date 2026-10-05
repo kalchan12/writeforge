@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from rightforge.analysis import (
     BasicTextAnalyzer,
     LinguisticAnalyzer,
+    SemanticCoherenceAnalyzer,
     StylometryAnalyzer,
 )
 from rightforge.models import (
@@ -14,6 +15,7 @@ from rightforge.models import (
     AuthorProfile,
     ConsistencyReport,
     Document,
+    SemanticCoherenceReport,
 )
 from rightforge.profiles import ProfileAggregator, ProfileComparator
 
@@ -108,6 +110,14 @@ def analyze_stylometry(request: TextAnalysisRequest) -> AnalysisResult:
     doc = Document(text=request.text, metadata=request.metadata)
     analyzer = StylometryAnalyzer()
     return analyzer.analyze_document(doc)
+
+
+@app.post("/analysis/coherence", response_model=SemanticCoherenceReport)
+def analyze_coherence(request: TextAnalysisRequest) -> SemanticCoherenceReport:
+    """Analyze document semantic coherence, lexical flow, and paragraph transitions."""
+    doc = Document(text=request.text, metadata=request.metadata)
+    analyzer = SemanticCoherenceAnalyzer()
+    return analyzer.analyze_coherence(doc)
 
 
 @app.post("/profiles/create", response_model=AuthorProfile)
