@@ -70,30 +70,37 @@ RightForge is a local-first writing analysis and author-style research platform.
 - [x] **Research Evaluation Harness**: `scripts/evaluate_perplexity.py` (EXP-002) evaluating perplexity and burstiness across synthetic, human narrative, and academic prose.
 - [x] **Tests & Documentation**: Added unit and integration tests (**93 tests total, 100% passing**). Updated `docs/research/DETECTION.md`, `docs/ai/ARCHITECTURE.md`.
 
+### Phase 9 — Controlled Revision Engine
+- [x] **Revision Domain Models**: `RevisionGoal`, `SentenceRevisionTarget`, and `RevisionPlan` in `engine/rightforge/models/revision.py`.
+- [x] **Revision Planning Engine**: `RevisionPlanner` in `engine/rightforge/revision/planner.py` analyzing consistency deviations and generating actionable sentence-level target interventions (excessive length, cadence monotony, repetitive openers, lexical redundancy).
+- [x] **Dual-Mode Planning**: Supports both standalone quality heuristic mode and profile-guided alignment mode against reference `AuthorProfile`.
+- [x] **API Endpoint**: `POST /revision/plan` returning `RevisionPlan`.
+- [x] **Tests & Documentation**: Added unit and integration tests (**104 tests total, 100% passing**). Created `docs/specifications/REVISION.md` and updated `docs/ai/ARCHITECTURE.md`.
+
 ---
 
 ## 3. Current State
 
-- **Active Phase**: Phase 8 Complete.
-- **Engine**: Pure-Python analysis, profiling, comparison, ML vectorization, and deterministic perplexity/burstiness modeling.
-- **Tests**: 93 passed in pytest in ~2.3s.
-- **Service**: 7 FastAPI endpoints operational.
+- **Active Phase**: Phase 9 Complete.
+- **Engine**: Pure-Python analysis, profiling, comparison, ML vectorization, deterministic perplexity/burstiness, and controlled revision planning.
+- **Tests**: 104 passed in pytest in ~2.6s.
+- **Service**: 8 FastAPI endpoints operational.
 - **Research**: EXP-001 (authorship classification) and EXP-002 (perplexity & burstiness) benchmark harnesses operational.
 
 ---
 
 ## 4. Known Limitations
 
-- **No Revision Suggestion Engine Yet**: Targeted transformation suggestions based on stylometric deviations are scheduled for Phase 9.
-- **No LLM Integration Yet**: Scheduled for Phase 10.
+- **No LLM Integration Yet**: Revision plans generate prescriptive guidance and diagnostic targets; automated execution via local LLMs is scheduled for Phase 10.
 - **No Persistence**: Storage remains in-memory.
 
 ---
 
-## 5. Next Milestone: Phase 9 — Controlled Revision Engine
+## 5. Next Milestone: Phase 10 — Local LLM Integration
 
-The next bounded objective will implement targeted stylistic revision planning:
-1. **Revision Domain Models**: `RevisionGoal`, `RevisionPlan`, `SentenceRevisionTarget` in `engine/rightforge/models/revision.py`.
-2. **Revision Planning Engine**: `RevisionPlanner` in `engine/rightforge/revision/planner.py` analyzing consistency deviations and generating actionable sentence-level target interventions (e.g., cadence adjustments, lexical diversity enhancement, passive voice modulation).
-3. **API Endpoint**: `POST /revision/plan` accepting an `AuthorProfile` and target `Document`.
-4. **Deterministic Tests & Documentation**: Unit and integration test coverage.
+The next bounded objective will implement local inference orchestration:
+1. **Local LLM Provider Abstraction**: `BaseLLMProvider` in `engine/rightforge/llm/base.py` and `OllamaProvider` in `engine/rightforge/llm/ollama.py`.
+2. **Prompt Template Engine**: Structured prompt generation in `engine/rightforge/llm/prompts.py` translating `RevisionPlan` into strict style-conditioned revision instructions.
+3. **Execution Pipeline**: `RevisionExecutor` in `engine/rightforge/revision/executor.py` executing controlled revisions and verifying candidate output against `AuthorProfile`.
+4. **API Endpoint**: `POST /revision/execute` with fallback for offline environments.
+5. **Deterministic Tests & Documentation**: Mock-backed integration and unit tests.

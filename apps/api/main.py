@@ -17,9 +17,11 @@ from rightforge.models import (
     ConsistencyReport,
     Document,
     PerplexityReport,
+    RevisionPlan,
     SemanticCoherenceReport,
 )
 from rightforge.profiles import ProfileAggregator, ProfileComparator
+from rightforge.revision import RevisionPlanner
 
 app = FastAPI(
     title="RightForge API",
@@ -69,6 +71,24 @@ class CompareProfileRequest(BaseModel):
 
     profile: AuthorProfile = Field(..., description="Target reference AuthorProfile")
     text: str = Field(..., min_length=1, description="Document text to evaluate")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Optional document metadata"
+    )
+    outlier_threshold: float = Field(
+        default=2.0,
+        ge=0.5,
+        le=5.0,
+        description="Standard deviation threshold for outlier identification",
+    )
+
+
+class RevisionPlanRequest(BaseModel):
+    """Request payload for revision strategy generation."""
+
+    text: str = Field(..., min_length=1, description="Document text to generate revision guidance for")
+    profile: AuthorProfile | None = Field(
+        default=None, description="Optional target AuthorProfile to steer style alignment"
+    )
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Optional document metadata"
     )
@@ -150,5 +170,17 @@ def compare_profile(request: CompareProfileRequest) -> ConsistencyReport:
     return comparator.compare(
         profile=request.profile,
         target=doc,
+        outlier_threshold=request.outlier_threshold,
+    )
+
+
+@app.post("/revision/plan", response_model=RevisionPlan)
+def plan_revision(request: RevisionPlanRequest) -> RevisionPlan:
+    """Construct rule-governed revision recommendations and style goals."""
+    doc = Document(text=request.text, metadata=request.metadata)
+    planner = RevisionPlanner()
+    return planner.generate_plan(
+        target=doc,
+        profile=request.profile,
         outlier_threshold=request.outlier_threshold,
     )

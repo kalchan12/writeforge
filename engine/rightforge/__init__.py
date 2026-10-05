@@ -29,11 +29,15 @@ from rightforge.models import (
     MetricDeviation,
     MetricResult,
     PerplexityReport,
+    RevisionGoal,
+    RevisionPlan,
     SemanticCoherenceReport,
     SentencePerplexity,
+    SentenceRevisionTarget,
     TransitionScore,
 )
 from rightforge.profiles import ProfileAggregator, ProfileComparator
+from rightforge.revision import RevisionPlanner
 
 __all__ = [
     "__version__",
@@ -57,10 +61,14 @@ __all__ = [
     "ProfileAggregator",
     "ProfileComparator",
     "PunctuationAnalyzer",
+    "RevisionGoal",
+    "RevisionPlan",
+    "RevisionPlanner",
     "SemanticCoherenceAnalyzer",
     "SemanticCoherenceReport",
     "SentenceAnalyzer",
     "SentencePerplexity",
+    "SentenceRevisionTarget",
     "StylometricVectorizer",
     "StylometryAnalyzer",
     "TransitionScore",
