@@ -96,18 +96,37 @@ RightForge is a local-first writing analysis and author-style research platform.
 
 ---
 
-## 4. Known Limitations
-
-- **Frontend Integration Pending**: Full Next.js Web UI connecting all 9 backend endpoints into an interactive writing dashboard is scheduled for Phase 11.
-- **No Persistence**: Storage remains in-memory.
+### Phase 11 — Web UI & Research Dashboard
+- [x] **Typed API Client**: `apps/web/src/lib/api.ts` and `apps/web/src/types/api.ts` connecting all 9 backend FastAPI endpoints with strict TypeScript types.
+- [x] **Interactive Dashboard Layout**: Next.js 14 tabbed application in `apps/web/src/app/page.tsx` with live backend status indicator and research presets.
+- [x] **Metric Scorecards**: `MetricCard` components displaying surface statistics, cadence standard deviation, readability indices, and semantic flow continuity.
+- [x] **Cadence & Perplexity Trajectory Chart**: Interactive SVG visualizer (`PerplexityGraph`) plotting per-sentence perplexity progression, burstiness coefficient ($CV$), and click-to-inspect sentence detail.
+- [x] **Author Profile Workbench**: `ProfilePanel` allowing interactive author corpus profiling, baseline visualization, and consistency scoring.
+- [x] **Controlled Revision Workbench**: `RevisionPanel` supporting diagnostic plan inspection, inference execution (Local Ollama vs Mock), side-by-side comparison, and metric shift verification.
+- [x] **Production Build Verified**: `next build` passes with zero errors (`Static` pages generated, 0 lint or type errors).
 
 ---
 
-## 5. Next Milestone: Phase 11 — Web UI & Research Dashboard
+## 3. Current State
 
-The next bounded objective will implement the local-first web interface:
-1. **Interactive Text Editor**: Dynamic document input with live metric cards (surface statistics, readability, vocabulary richness).
-2. **Author Profile Visualizer**: Radar/bar distribution charts comparing document metrics against author baselines and showing outlier flags.
-3. **Burstiness & Perplexity Graph**: Sentence-by-sentence perplexity progression chart showing cadence peaks and uniform regions.
-4. **Controlled Revision Workbench**: Interactive panel displaying revision goals, sentence-level interventions, side-by-side comparison, and one-click execution.
-5. **E2E & Component Tests**: Next.js testing for API client and interactive components.
+- **Active Phase**: Phase 11 Complete.
+- **Engine**: Pure-Python analysis, profiling, comparison, ML vectorization, deterministic perplexity/burstiness, revision planning, and local LLM execution.
+- **Web UI**: Next.js 14 research dashboard operational and connecting to FastAPI backend.
+- **Tests**: 116 passed in pytest in ~2.8s; Next.js production build passing.
+- **Service**: 9 FastAPI endpoints operational.
+- **Research**: EXP-001 (authorship classification) and EXP-002 (perplexity & burstiness) benchmark harnesses operational.
+
+---
+
+## 4. Known Limitations
+
+- **No Native Desktop Packaging Yet**: Application runs via web browser and local terminal; native packaging (Tauri / SQLite local persistence) is scheduled for Phase 12.
+
+---
+
+## 5. Next Milestone: Phase 12 — Desktop Packaging & Production Hardening
+
+The final bounded objective will package RightForge into a standalone application:
+1. **Local SQLite Persistence**: SQLite database schema for persistent local document history, custom author profiles, and revision audit logs.
+2. **Offline Bundling & Launcher**: Single-binary or launcher workflow for zero-configuration desktop operation.
+3. **End-to-End Hardening**: Final performance audits, memory profiling, and release verification.

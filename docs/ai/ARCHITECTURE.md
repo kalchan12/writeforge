@@ -66,6 +66,10 @@ Strict rules govern dependencies within the repository:
   * `evaluate_perplexity.py`: Perplexity and burstiness evaluation across diverse and synthetic text genres (EXP-002).
   * `evaluate_classifier.py`: Cross-validation classification harness testing stylistic discrimination (EXP-001).
 * `apps/api/main.py`: RESTful endpoints for basic, linguistic, stylometric, coherence, perplexity, and revision planning/execution, alongside profile creation and comparison.
+* `apps/web/`:
+  * `src/lib/api.ts`: Typed API client connecting to all 9 FastAPI backend endpoints.
+  * `src/components/`: Interactive components (`MetricCard`, `PerplexityGraph`, `ProfilePanel`, `RevisionPanel`).
+  * `src/app/page.tsx`: Tabbed research dashboard unifying metric analysis, perplexity trajectory charting, author profile management, and controlled revision execution.
 
 ## 5. Future Target Architecture (Reference Only)
 
