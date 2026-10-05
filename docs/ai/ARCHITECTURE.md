@@ -36,18 +36,21 @@ Strict rules govern dependencies within the repository:
 | Component | Path | Responsibility | Allowed Dependencies |
 | :--- | :--- | :--- | :--- |
 | **Domain Models** | `engine/rightforge/models/` | Base entities: `Document`, `MetricResult`, `AnalysisResult` | Pydantic, Python stdlib |
-| **Text Processing** | `engine/rightforge/text/` | Tokenization, sentence splitting, normalization | Python stdlib, regex (later spaCy) |
-| **Analysis** | `engine/rightforge/analysis/` | Modular analyzers (lexical, sentence, punctuation) | `rightforge.models`, `rightforge.text` |
+| **Text Processing** | `engine/rightforge/text/` | Deterministic tokenization, sentence splitting, paragraph segmentation | Python stdlib, regex |
+| **Analysis** | `engine/rightforge/analysis/` | Modular analyzers (`BasicTextAnalyzer`) | `rightforge.models`, `rightforge.text` |
 | **Core Utilities** | `engine/rightforge/core/` | Base classes, configuration primitives | Python stdlib |
-| **API Application** | `apps/api/` | HTTP routing, request validation, error formatting | FastAPI, Pydantic, `rightforge.*` |
+| **API Application** | `apps/api/` | HTTP routing, request validation, error formatting (`GET /health`, `POST /analysis/basic`) | FastAPI, Pydantic, `rightforge.*` |
 | **Frontend Web** | `apps/web/` | Visual interface, interactive feedback | React, Next.js, TypeScript |
 
-## 4. Current Phase 0 Architecture
+## 4. Active Architecture (Phase 1)
 
-In Phase 0, the architecture is intentionally minimal:
-* `apps/api/main.py`: Exposes `GET /health` with structured status.
-* `engine/rightforge/models/document.py`: Defines immutable and validated base models (`Document`, `MetricResult`, `AnalysisResult`).
-* `apps/web/`: Single-page health check verification shell.
+* `apps/api/main.py`:
+  * `GET /health`: Service health verification.
+  * `POST /analysis/basic`: Accepts text payloads and returns structured `AnalysisResult`.
+* `engine/rightforge/text/segmentation.py`: Deterministic paragraph, sentence, and word extraction.
+* `engine/rightforge/analysis/basic.py`: Computes 10 surface text metrics with mathematical determinism.
+* `engine/rightforge/models/document.py`: Base domain models (`Document`, `MetricResult`, `AnalysisResult`).
+* `apps/web/`: Foundation Next.js client.
 
 ## 5. Future Target Architecture (Reference Only)
 
@@ -93,5 +96,3 @@ In Phase 0, the architecture is intentionally minimal:
             Local           Cloud          Future
              LLM             API          Providers
 ```
-
-Note: Future architecture nodes are not active in Phase 0.
