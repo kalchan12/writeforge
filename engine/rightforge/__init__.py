@@ -12,6 +12,7 @@ from rightforge.analysis import (
     SentenceAnalyzer,
     StylometryAnalyzer,
 )
+from rightforge.ml import FEATURE_NAMES, StylometricVectorizer
 from rightforge.models import (
     AnalysisResult,
     AuthorProfile,
@@ -33,6 +34,7 @@ __all__ = [
     "BasicTextAnalyzer",
     "ConsistencyReport",
     "Document",
+    "FEATURE_NAMES",
     "LexicalAnalyzer",
     "LinguisticAnalyzer",
     "MetricBaseline",
@@ -44,6 +46,7 @@ __all__ = [
     "SemanticCoherenceAnalyzer",
     "SemanticCoherenceReport",
     "SentenceAnalyzer",
+    "StylometricVectorizer",
     "StylometryAnalyzer",
     "TransitionScore",
 ]
