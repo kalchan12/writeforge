@@ -30,6 +30,7 @@ Strict rules govern dependencies within the repository:
 * **Engine Layer** must have **zero knowledge** of FastAPI, HTTP, or the frontend. It must never import from `apps.*`.
 * **API Layer** acts as an adapter. It may import domain models and analyzers from `rightforge.*`, translate HTTP requests into engine invocations, and return JSON responses.
 * **Web Layer** interacts strictly over HTTP network boundaries (REST).
+* **Research / ML Layer** consumes the engine as a library without introducing ML coupling into the core engine models or API runtime.
 
 ## 3. Component Responsibilities
 
@@ -39,29 +40,22 @@ Strict rules govern dependencies within the repository:
 | **Text Processing** | `engine/rightforge/text/` | Deterministic segmentation, syllable estimation, function word dictionaries | Python stdlib, regex |
 | **Analysis** | `engine/rightforge/analysis/` | Modular analyzers (`BaseAnalyzer`, `BasicTextAnalyzer`, `LexicalAnalyzer`, `SentenceAnalyzer`, `PunctuationAnalyzer`, `StylometryAnalyzer`, `SemanticCoherenceAnalyzer`, `LinguisticAnalyzer`) | `rightforge.models`, `rightforge.text` |
 | **Profiles** | `engine/rightforge/profiles/` | Multi-document profile aggregation (`ProfileAggregator`) and alignment scoring (`ProfileComparator`) | `rightforge.models`, `rightforge.analysis` |
+| **ML & Vectorization** | `engine/rightforge/ml/` | Stylometric feature extraction (`StylometricVectorizer`) | `rightforge.analysis`, `numpy` (optional) |
+| **Research Scripts** | `scripts/` | Benchmark harnesses, model training, validation experiments | `rightforge.*`, `scikit-learn`, `numpy` |
 | **Core Utilities** | `engine/rightforge/core/` | Base classes, configuration primitives | Python stdlib |
 | **API Application** | `apps/api/` | HTTP routing, request validation (`GET /health`, `POST /analysis/*`, `POST /profiles/*`) | FastAPI, Pydantic, `rightforge.*` |
 | **Frontend Web** | `apps/web/` | Visual interface, interactive feedback | React, Next.js, TypeScript |
 
-## 4. Active Architecture (Phase 6)
+## 4. Active Architecture (Phase 7)
 
-* `apps/api/main.py`:
-  * `GET /health`: Service health verification.
-  * `POST /analysis/basic`: Surface document statistics.
-  * `POST /analysis/linguistic`: Lexical diversity, sentence rhythm, and punctuation metrics.
-  * `POST /analysis/stylometry`: Stylometric invariants, vocabulary richness, and readability.
-  * `POST /analysis/coherence`: Semantic flow, lexical chaining, and transition dynamics.
-  * `POST /profiles/create`: Constructs multi-document `AuthorProfile` with metric baselines.
-  * `POST /profiles/compare`: Evaluates a document against an `AuthorProfile`, returning deviation z-scores and composite consistency scores ($0.0 - 1.0$).
-* `engine/rightforge/models/`:
-  * `document.py`: `Document`, `MetricResult`, `AnalysisResult`.
-  * `profile.py`: `AuthorProfile`, `MetricBaseline`.
-  * `comparison.py`: `MetricDeviation`, `ConsistencyReport`.
-  * `semantics.py`: `SemanticCoherenceReport`, `TransitionScore`.
-* `engine/rightforge/analysis/`:
-  * `semantics.py`: `SemanticCoherenceAnalyzer` measuring Jaccard segment transitions, overlap coefficients, and lexical chaining.
+* `engine/rightforge/ml/`:
+  * `vectorizer.py`: `StylometricVectorizer` extracting 31-dimensional normalized numerical feature vectors compatible with scikit-learn transformers.
+* `scripts/`:
+  * `evaluate_classifier.py`: Cross-validation classification harness testing stylistic discrimination.
+* `docs/research/EXPERIMENTS.md`: Experiment logs, accuracy metrics, and Gini feature importance rankings.
+* `apps/api/main.py`: RESTful endpoints for basic, linguistic, stylometric, coherence analysis, and profile creation/comparison.
 * `engine/rightforge/profiles/`: Aggregator and comparator engines.
-* `engine/rightforge/text/`: Segmentation, syllables, and function words.
+* `engine/rightforge/analysis/`: Modular deterministic text analyzers.
 
 ## 5. Future Target Architecture (Reference Only)
 

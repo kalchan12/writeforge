@@ -50,45 +50,43 @@ RightForge is a local-first writing analysis and author-style research platform.
 
 ### Phase 6 — Semantic Similarity & Coherence
 - [x] **Semantic Domain Models**: `SemanticCoherenceReport` and `TransitionScore` in `engine/rightforge/models/semantics.py`.
-- [x] **Lexical Cohesion & Flow Engine**: Implemented `SemanticCoherenceAnalyzer` in `engine/rightforge/analysis/semantics.py`:
-  - Segment-by-segment content word extraction (excluding function words).
-  - Jaccard similarity and overlap coefficients for adjacent sentences and paragraphs.
-  - Document-wide lexical chaining tracking content word repetition rates across paragraphs.
-  - Abrupt transition / topic shift identification.
-- [x] **API Endpoint**: Exposed `POST /analysis/coherence`.
-- [x] **Deterministic Tests**: Added 8 unit and integration tests (**77 tests total, 100% passing**).
-- [x] **Documentation**: Updated `docs/specifications/ANALYZER.md` and `docs/ai/ARCHITECTURE.md`.
+- [x] **Lexical Cohesion & Flow Engine**: `SemanticCoherenceAnalyzer` in `engine/rightforge/analysis/semantics.py`.
+- [x] **API Endpoint**: `POST /analysis/coherence`.
+- [x] **Tests & Docs**: Deterministic tests and specification updates.
+
+### Phase 7 — Classical ML Experiments
+- [x] **Feature Vectorizer**: Implemented `StylometricVectorizer` in `engine/rightforge/ml/vectorizer.py` extracting 31-dimensional normalized numerical feature arrays.
+- [x] **ML Pipeline Integration**: Compatible with scikit-learn transformer interface (`fit`, `transform`, `fit_transform`).
+- [x] **Evaluation Harness**: Created `scripts/evaluate_classifier.py` implementing Stratified K-Fold cross-validation across distinct style classes.
+- [x] **Empirical Findings Logged**: Documented classification accuracy and top discriminative features (Gini importance) in `docs/research/EXPERIMENTS.md`.
+- [x] **Deterministic Tests**: Added 4 unit tests verifying vector matrix shapes, zero-variance handling, and vector stability (**81 tests total, 100% passing**).
+- [x] **Documentation**: Updated `docs/research/EXPERIMENTS.md` and `docs/ai/ARCHITECTURE.md`.
 
 ---
 
 ## 3. Current State
 
-- **Active Phase**: Phase 6 Complete.
-- **Engine**: Pure-Python analysis, profiling, comparison, and semantic flow measurement.
-- **Tests**: 77 passed in pytest in ~1.7s.
-- **Service**: FastAPI server exposing:
-  - `GET /health`
-  - `POST /analysis/basic`
-  - `POST /analysis/linguistic`
-  - `POST /analysis/stylometry`
-  - `POST /analysis/coherence`
-  - `POST /profiles/create`
-  - `POST /profiles/compare`
+- **Active Phase**: Phase 7 Complete.
+- **Engine**: Pure-Python analysis, profiling, comparison, and ML vectorization.
+- **Tests**: 81 passed in pytest in ~2.3s.
+- **Service**: 6 FastAPI endpoints operational.
+- **Research**: Benchmark evaluation harness operational.
 
 ---
 
 ## 4. Known Limitations
 
-- **No Classical ML Pipelines Yet**: Stylometric and coherence metrics are extracted deterministically; vectorization pipelines and supervised authorship/style classifiers are scheduled for Phase 7.
+- **No Transformer/Perplexity Models Yet**: Vectorization and classification are classical; token-level likelihood distributions and transformer perplexity modeling are scheduled for Phase 8.
+- **No LLM Integration Yet**: Scheduled for Phase 10.
 - **No Persistence**: Storage remains in-memory.
-- **No Heavy Deep Learning**: Explicitly deferred to Phase 8 (Transformer-Based Research).
 
 ---
 
-## 5. Next Milestone: Phase 7 — Classical ML Experiments
+## 5. Next Milestone: Phase 8 — Transformer-Based Research
 
-The next bounded objective will implement classical machine learning feature extraction and classification baselines:
-1. **Feature Vectorizer**: `StylometricVectorizer` in `engine/rightforge/ml/vectorizer.py` extracting normalized numerical feature arrays from documents.
-2. **Evaluation Harness**: Experiment runner script in `scripts/evaluate_classifier.py` using scikit-learn (RandomForest / LogisticRegression / SVM) to classify sample authorship corpora.
-3. **Research Notes**: Document empirical results and feature importance rankings in `docs/research/EXPERIMENTS.md`.
-4. **Deterministic Tests**: Verifying vectorizer dimension consistency, zero-variance handling, and model reproducibility.
+The next bounded objective will implement local transformer research foundations:
+1. **Perplexity & Burstiness Models**: `PerplexityReport`, `TokenProbabilityProfile` in `engine/rightforge/models/transformers.py`.
+2. **Local Probability Scorer**: Abstract `LocalProbabilityModel` evaluating token cross-entropy, sentence-level perplexity variance (burstiness), and distribution statistics.
+3. **Research Evaluation**: Benchmark script in `scripts/evaluate_perplexity.py`.
+4. **Documentation**: Update `docs/research/DETECTION.md` with empirical perplexity findings.
+5. **Deterministic Tests**: Mockable and local probability calculation tests.
