@@ -41,13 +41,16 @@ Strict rules govern dependencies within the repository:
 | **Analysis** | `engine/rightforge/analysis/` | Modular analyzers (`BaseAnalyzer`, `BasicTextAnalyzer`, `LexicalAnalyzer`, `SentenceAnalyzer`, `PunctuationAnalyzer`, `StylometryAnalyzer`, `SemanticCoherenceAnalyzer`, `LinguisticAnalyzer`) | `rightforge.models`, `rightforge.text` |
 | **Profiles** | `engine/rightforge/profiles/` | Multi-document profile aggregation (`ProfileAggregator`) and alignment scoring (`ProfileComparator`) | `rightforge.models`, `rightforge.analysis` |
 | **ML & Vectorization** | `engine/rightforge/ml/` | Stylometric feature extraction (`StylometricVectorizer`) | `rightforge.analysis`, `numpy` (optional) |
-| **Research Scripts** | `scripts/` | Benchmark harnesses, model training, validation experiments | `rightforge.*`, `scikit-learn`, `numpy` |
+| **Storage & Persistence** | `engine/rightforge/storage/` | SQLite persistence with WAL mode (`DatabaseManager`) for documents, profiles, and audit logs | `sqlite3`, Python stdlib |
+| **Research Scripts** | `scripts/` | Benchmark harnesses, model training, validation experiments, desktop launcher | `rightforge.*`, `scikit-learn`, `numpy` |
 | **Core Utilities** | `engine/rightforge/core/` | Base classes, configuration primitives | Python stdlib |
-| **API Application** | `apps/api/` | HTTP routing, request validation (`GET /health`, `POST /analysis/*`, `POST /profiles/*`) | FastAPI, Pydantic, `rightforge.*` |
+| **API Application** | `apps/api/` | HTTP routing, request validation (`GET /health`, `POST /analysis/*`, `POST /profiles/*`, `GET /profiles`, `POST /revision/*`, `GET /revision/logs`) | FastAPI, Pydantic, `rightforge.*` |
 | **Frontend Web** | `apps/web/` | Visual interface, interactive feedback | React, Next.js, TypeScript |
 
-## 4. Active Architecture (Phase 7)
+## 4. Completed Architecture (Phases 0–12)
 
+* `engine/rightforge/storage/`:
+  * `db.py`: `DatabaseManager` providing SQLite persistence with WAL mode, non-blocking concurrent connections, and ACID transactions for `documents`, `author_profiles`, and `revision_logs`.
 * `engine/rightforge/ml/`:
   * `probability.py`: `BaseProbabilityModel` (ABC) and deterministic `NgramProbabilityModel` with Lidstone smoothing.
   * `hf_model.py`: Optional lazy-loaded `HuggingFaceProbabilityModel` for local transformer weights.
@@ -63,11 +66,12 @@ Strict rules govern dependencies within the repository:
   * `planner.py`: `RevisionPlanner` formulating rule-governed revision goals and granular sentence interventions (`RevisionPlan`).
   * `executor.py`: `RevisionExecutor` executing style-conditioned LLM revisions and conducting pre/post metric verification (`RevisionExecutionResult`).
 * `scripts/`:
+  * `desktop_launcher.py`: Standalone offline desktop launcher orchestrating concurrent API + Web services, port verification, readiness probing, browser dispatch, and graceful shutdown.
   * `evaluate_perplexity.py`: Perplexity and burstiness evaluation across diverse and synthetic text genres (EXP-002).
   * `evaluate_classifier.py`: Cross-validation classification harness testing stylistic discrimination (EXP-001).
-* `apps/api/main.py`: RESTful endpoints for basic, linguistic, stylometric, coherence, perplexity, and revision planning/execution, alongside profile creation and comparison.
+* `apps/api/main.py`: RESTful endpoints for basic, linguistic, stylometric, coherence, perplexity, and revision planning/execution, alongside profile creation, listing, retrieval, and revision audit logs.
 * `apps/web/`:
-  * `src/lib/api.ts`: Typed API client connecting to all 9 FastAPI backend endpoints.
+  * `src/lib/api.ts`: Typed API client connecting to FastAPI backend endpoints.
   * `src/components/`: Interactive components (`MetricCard`, `PerplexityGraph`, `ProfilePanel`, `RevisionPanel`).
   * `src/app/page.tsx`: Tabbed research dashboard unifying metric analysis, perplexity trajectory charting, author profile management, and controlled revision execution.
 
