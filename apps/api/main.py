@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-from rightforge.analysis import BasicTextAnalyzer
+from rightforge.analysis import BasicTextAnalyzer, LinguisticAnalyzer
 from rightforge.models import AnalysisResult, Document
 
 app = FastAPI(
@@ -22,8 +22,8 @@ class HealthResponse(BaseModel):
     version: str
 
 
-class BasicAnalysisRequest(BaseModel):
-    """Request payload for basic document analysis."""
+class TextAnalysisRequest(BaseModel):
+    """Request payload for document analysis endpoints."""
 
     text: str = Field(..., description="The input text content to analyze")
     metadata: dict[str, Any] = Field(
@@ -42,8 +42,16 @@ def get_health() -> dict[str, Any]:
 
 
 @app.post("/analysis/basic", response_model=AnalysisResult)
-def analyze_basic(request: BasicAnalysisRequest) -> AnalysisResult:
+def analyze_basic(request: TextAnalysisRequest) -> AnalysisResult:
     """Analyze a document and compute deterministic surface text statistics."""
     doc = Document(text=request.text, metadata=request.metadata)
     analyzer = BasicTextAnalyzer()
     return analyzer.analyze(doc)
+
+
+@app.post("/analysis/linguistic", response_model=AnalysisResult)
+def analyze_linguistic(request: TextAnalysisRequest) -> AnalysisResult:
+    """Analyze a document and compute modular linguistic metrics (lexical, sentence, punctuation)."""
+    doc = Document(text=request.text, metadata=request.metadata)
+    analyzer = LinguisticAnalyzer()
+    return analyzer.analyze_document(doc)
