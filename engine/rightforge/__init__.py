@@ -8,6 +8,7 @@ from rightforge.analysis import (
     LexicalAnalyzer,
     LinguisticAnalyzer,
     PunctuationAnalyzer,
+    SemanticCoherenceAnalyzer,
     SentenceAnalyzer,
     StylometryAnalyzer,
 )
@@ -19,6 +20,8 @@ from rightforge.models import (
     MetricBaseline,
     MetricDeviation,
     MetricResult,
+    SemanticCoherenceReport,
+    TransitionScore,
 )
 from rightforge.profiles import ProfileAggregator, ProfileComparator
 
@@ -38,6 +41,9 @@ __all__ = [
     "ProfileAggregator",
     "ProfileComparator",
     "PunctuationAnalyzer",
+    "SemanticCoherenceAnalyzer",
+    "SemanticCoherenceReport",
     "SentenceAnalyzer",
     "StylometryAnalyzer",
+    "TransitionScore",
 ]
