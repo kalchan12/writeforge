@@ -18,6 +18,8 @@ def test_package_exports() -> None:
     assert hasattr(rightforge, "Document")
     assert hasattr(rightforge, "MetricResult")
     assert hasattr(rightforge, "AnalysisResult")
+    assert hasattr(rightforge, "PerplexityAnalyzer")
+    assert hasattr(rightforge, "PerplexityReport")
 
 
 def test_api_app_instantiated() -> None:

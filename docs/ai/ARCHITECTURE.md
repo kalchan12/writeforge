@@ -49,13 +49,16 @@ Strict rules govern dependencies within the repository:
 ## 4. Active Architecture (Phase 7)
 
 * `engine/rightforge/ml/`:
+  * `probability.py`: `BaseProbabilityModel` (ABC) and deterministic `NgramProbabilityModel` with Lidstone smoothing.
+  * `hf_model.py`: Optional lazy-loaded `HuggingFaceProbabilityModel` for local transformer weights.
   * `vectorizer.py`: `StylometricVectorizer` extracting 31-dimensional normalized numerical feature vectors compatible with scikit-learn transformers.
+* `engine/rightforge/analysis/`:
+  * `perplexity.py`: `PerplexityAnalyzer` computing sentence perplexity trajectories and burstiness ($CV = \sigma / \mu$).
+  * Modular deterministic text analyzers: basic, lexical, sentence, punctuation, stylometry, semantics, and perplexity.
 * `scripts/`:
-  * `evaluate_classifier.py`: Cross-validation classification harness testing stylistic discrimination.
-* `docs/research/EXPERIMENTS.md`: Experiment logs, accuracy metrics, and Gini feature importance rankings.
-* `apps/api/main.py`: RESTful endpoints for basic, linguistic, stylometric, coherence analysis, and profile creation/comparison.
-* `engine/rightforge/profiles/`: Aggregator and comparator engines.
-* `engine/rightforge/analysis/`: Modular deterministic text analyzers.
+  * `evaluate_perplexity.py`: Perplexity and burstiness evaluation across diverse and synthetic text genres (EXP-002).
+  * `evaluate_classifier.py`: Cross-validation classification harness testing stylistic discrimination (EXP-001).
+* `apps/api/main.py`: RESTful endpoints for basic, linguistic, stylometric, coherence, and perplexity analysis, alongside profile creation and comparison.
 
 ## 5. Future Target Architecture (Reference Only)
 

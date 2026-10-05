@@ -4,6 +4,7 @@ from rightforge.models.comparison import ConsistencyReport, MetricDeviation
 from rightforge.models.document import AnalysisResult, Document, MetricResult
 from rightforge.models.profile import AuthorProfile, MetricBaseline
 from rightforge.models.semantics import SemanticCoherenceReport, TransitionScore
+from rightforge.models.transformers import PerplexityReport, SentencePerplexity
 
 __all__ = [
     "AnalysisResult",
@@ -13,6 +14,8 @@ __all__ = [
     "MetricBaseline",
     "MetricDeviation",
     "MetricResult",
+    "PerplexityReport",
     "SemanticCoherenceReport",
+    "SentencePerplexity",
     "TransitionScore",
 ]

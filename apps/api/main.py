@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from rightforge.analysis import (
     BasicTextAnalyzer,
     LinguisticAnalyzer,
+    PerplexityAnalyzer,
     SemanticCoherenceAnalyzer,
     StylometryAnalyzer,
 )
@@ -15,6 +16,7 @@ from rightforge.models import (
     AuthorProfile,
     ConsistencyReport,
     Document,
+    PerplexityReport,
     SemanticCoherenceReport,
 )
 from rightforge.profiles import ProfileAggregator, ProfileComparator
@@ -118,6 +120,14 @@ def analyze_coherence(request: TextAnalysisRequest) -> SemanticCoherenceReport:
     doc = Document(text=request.text, metadata=request.metadata)
     analyzer = SemanticCoherenceAnalyzer()
     return analyzer.analyze_coherence(doc)
+
+
+@app.post("/analysis/perplexity", response_model=PerplexityReport)
+def analyze_perplexity(request: TextAnalysisRequest) -> PerplexityReport:
+    """Analyze token probability trajectories, sentence perplexity, and burstiness."""
+    doc = Document(text=request.text, metadata=request.metadata)
+    analyzer = PerplexityAnalyzer()
+    return analyzer.analyze_perplexity(doc)
 
 
 @app.post("/profiles/create", response_model=AuthorProfile)

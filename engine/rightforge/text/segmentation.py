@@ -83,15 +83,17 @@ def split_sentences(text: str) -> list[str]:
     return sentences if sentences else [cleaned]
 
 
-def tokenize_words(text: str) -> list[str]:
+def tokenize_words(text: str, lowercase: bool = False) -> list[str]:
     """Extract words from text, ignoring standalone punctuation and numerals.
 
     Args:
         text: Raw text content.
+        lowercase: Whether to convert extracted words to lowercase.
 
     Returns:
         List of word strings.
     """
     if not text or not text.strip():
         return []
-    return _WORD_REGEX.findall(text)
+    words = _WORD_REGEX.findall(text)
+    return [w.lower() for w in words] if lowercase else words

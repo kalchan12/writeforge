@@ -62,31 +62,38 @@ RightForge is a local-first writing analysis and author-style research platform.
 - [x] **Deterministic Tests**: Added 4 unit tests verifying vector matrix shapes, zero-variance handling, and vector stability (**81 tests total, 100% passing**).
 - [x] **Documentation**: Updated `docs/research/EXPERIMENTS.md` and `docs/ai/ARCHITECTURE.md`.
 
+### Phase 8 — Transformer-Based Research (Perplexity & Burstiness Modeling)
+- [x] **Perplexity Domain Models**: `SentencePerplexity` and `PerplexityReport` in `engine/rightforge/models/transformers.py`.
+- [x] **Probability Model Abstraction**: `BaseProbabilityModel`, deterministic `NgramProbabilityModel` (Lidstone smoothed bigrams), and lazy-loaded `HuggingFaceProbabilityModel` in `engine/rightforge/ml/`.
+- [x] **Perplexity & Burstiness Engine**: `PerplexityAnalyzer` in `engine/rightforge/analysis/perplexity.py` computing token logprobs, sentence perplexity, and burstiness ($CV = \sigma / \mu$).
+- [x] **API Endpoint**: `POST /analysis/perplexity` returning `PerplexityReport`.
+- [x] **Research Evaluation Harness**: `scripts/evaluate_perplexity.py` (EXP-002) evaluating perplexity and burstiness across synthetic, human narrative, and academic prose.
+- [x] **Tests & Documentation**: Added unit and integration tests (**93 tests total, 100% passing**). Updated `docs/research/DETECTION.md`, `docs/ai/ARCHITECTURE.md`.
+
 ---
 
 ## 3. Current State
 
-- **Active Phase**: Phase 7 Complete.
-- **Engine**: Pure-Python analysis, profiling, comparison, and ML vectorization.
-- **Tests**: 81 passed in pytest in ~2.3s.
-- **Service**: 6 FastAPI endpoints operational.
-- **Research**: Benchmark evaluation harness operational.
+- **Active Phase**: Phase 8 Complete.
+- **Engine**: Pure-Python analysis, profiling, comparison, ML vectorization, and deterministic perplexity/burstiness modeling.
+- **Tests**: 93 passed in pytest in ~2.3s.
+- **Service**: 7 FastAPI endpoints operational.
+- **Research**: EXP-001 (authorship classification) and EXP-002 (perplexity & burstiness) benchmark harnesses operational.
 
 ---
 
 ## 4. Known Limitations
 
-- **No Transformer/Perplexity Models Yet**: Vectorization and classification are classical; token-level likelihood distributions and transformer perplexity modeling are scheduled for Phase 8.
+- **No Revision Suggestion Engine Yet**: Targeted transformation suggestions based on stylometric deviations are scheduled for Phase 9.
 - **No LLM Integration Yet**: Scheduled for Phase 10.
 - **No Persistence**: Storage remains in-memory.
 
 ---
 
-## 5. Next Milestone: Phase 8 — Transformer-Based Research
+## 5. Next Milestone: Phase 9 — Controlled Revision Engine
 
-The next bounded objective will implement local transformer research foundations:
-1. **Perplexity & Burstiness Models**: `PerplexityReport`, `TokenProbabilityProfile` in `engine/rightforge/models/transformers.py`.
-2. **Local Probability Scorer**: Abstract `LocalProbabilityModel` evaluating token cross-entropy, sentence-level perplexity variance (burstiness), and distribution statistics.
-3. **Research Evaluation**: Benchmark script in `scripts/evaluate_perplexity.py`.
-4. **Documentation**: Update `docs/research/DETECTION.md` with empirical perplexity findings.
-5. **Deterministic Tests**: Mockable and local probability calculation tests.
+The next bounded objective will implement targeted stylistic revision planning:
+1. **Revision Domain Models**: `RevisionGoal`, `RevisionPlan`, `SentenceRevisionTarget` in `engine/rightforge/models/revision.py`.
+2. **Revision Planning Engine**: `RevisionPlanner` in `engine/rightforge/revision/planner.py` analyzing consistency deviations and generating actionable sentence-level target interventions (e.g., cadence adjustments, lexical diversity enhancement, passive voice modulation).
+3. **API Endpoint**: `POST /revision/plan` accepting an `AuthorProfile` and target `Document`.
+4. **Deterministic Tests & Documentation**: Unit and integration test coverage.
