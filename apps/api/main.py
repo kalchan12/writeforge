@@ -9,7 +9,8 @@ from rightforge.analysis import (
     LinguisticAnalyzer,
     StylometryAnalyzer,
 )
-from rightforge.models import AnalysisResult, Document
+from rightforge.models import AnalysisResult, AuthorProfile, Document
+from rightforge.profiles import ProfileAggregator
 
 app = FastAPI(
     title="RightForge API",
@@ -32,6 +33,25 @@ class TextAnalysisRequest(BaseModel):
     text: str = Field(..., description="The input text content to analyze")
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Optional metadata attributes"
+    )
+
+
+class ProfileDocumentItem(BaseModel):
+    """Document entry for profile creation."""
+
+    text: str = Field(..., description="Document text content")
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class CreateProfileRequest(BaseModel):
+    """Request payload for author profile generation."""
+
+    author_name: str = Field(..., min_length=1, description="Author identifier or name")
+    documents: list[ProfileDocumentItem] = Field(
+        ..., min_length=1, description="Sample documents from the author"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Optional profile metadata"
     )
 
 
@@ -67,3 +87,15 @@ def analyze_stylometry(request: TextAnalysisRequest) -> AnalysisResult:
     doc = Document(text=request.text, metadata=request.metadata)
     analyzer = StylometryAnalyzer()
     return analyzer.analyze_document(doc)
+
+
+@app.post("/profiles/create", response_model=AuthorProfile)
+def create_profile(request: CreateProfileRequest) -> AuthorProfile:
+    """Construct an AuthorProfile with metric baselines aggregated across author documents."""
+    docs = [Document(text=d.text, metadata=d.metadata) for d in request.documents]
+    aggregator = ProfileAggregator()
+    return aggregator.create_profile(
+        author_name=request.author_name,
+        documents=docs,
+        metadata=request.metadata,
+    )
