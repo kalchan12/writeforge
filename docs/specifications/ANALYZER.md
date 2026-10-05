@@ -2,9 +2,9 @@
 
 ## 1. Overview
 
-The analyzer engine (`engine/rightforge/analysis/`) is responsible for extracting quantifiable properties and linguistic metrics from text documents. It utilizes composable, deterministic analyzers built in pure Python.
+The analyzer engine (`engine/rightforge/analysis/`) is responsible for extracting quantifiable properties, linguistic structures, and stylometric characteristics from text documents. It utilizes composable, deterministic analyzers built in pure Python.
 
-> **Research Boundary Note**: None of the metrics computed by these analyzers indicate whether a text was authored by an AI system. They represent purely empirical, mathematical, and linguistic characteristics of the input text.
+> **Research Boundary Note**: None of the metrics computed by these analyzers indicate whether a text was authored by an AI system. They represent empirical, mathematical, stylistic, and linguistic characteristics of the input text.
 
 ## 2. Core Interface Contract
 
@@ -65,19 +65,37 @@ Measures mark frequencies and punctuation density:
 * `punctuation_density_per_char`: $\frac{\text{total punctuation}}{\text{total characters}}$.
 * `punctuation_density_per_word`: $\frac{\text{total punctuation}}{\text{total words}}$.
 
-### 3.5 LinguisticAnalyzer (`engine/rightforge/analysis/linguistic.py`)
-Composite pipeline orchestrating `LexicalAnalyzer`, `SentenceAnalyzer`, and `PunctuationAnalyzer`, returning a unified `AnalysisResult`.
+### 3.5 StylometryAnalyzer (`engine/rightforge/analysis/stylometry.py`)
+Measures authorial fingerprints, vocabulary concentration, function words, and readability:
+* **Hapax Legomena** ($V_1$): Count and ratio of words appearing exactly once (`hapax_legomena_count`, `hapax_legomena_ratio`).
+* **Dis Legomena** ($V_2$): Count and ratio of words appearing exactly twice (`dis_legomena_count`, `dis_legomena_ratio`).
+* **Yule's K Characteristic**:
+  $$K = 10^4 \cdot \frac{\sum_{i=1}^{\infty} i^2 V_i - N}{N^2}$$
+  Measures vocabulary concentration independent of text length.
+* **Simpson's D Index & Diversity**:
+  $$D = \frac{\sum n_i (n_i - 1)}{N (N - 1)}, \quad \text{Diversity} = 1 - D$$
+* **Function Words**:
+  Frequencies of closed-class topic-neutral words resistant to intentional masking:
+  * `function_word_count` / `function_word_ratio`
+  * `preposition_ratio`
+  * `pronoun_ratio`
+  * `conjunction_ratio`
+  * `auxiliary_verb_ratio`
+  * `determiner_ratio`
+* **Readability Indices**:
+  * `total_syllables` and `syllables_per_word` (rule-based phonetic syllable estimation).
+  * **Flesch Reading Ease**:
+    $$\text{FRE} = 206.835 - 1.015 \left(\frac{N_{\text{words}}}{N_{\text{sent}}}\right) - 84.6 \left(\frac{N_{\text{syllables}}}{N_{\text{words}}}\right)$$
+  * **Flesch-Kincaid Grade Level**:
+    $$\text{FKGL} = 0.39 \left(\frac{N_{\text{words}}}{N_{\text{sent}}}\right) + 11.8 \left(\frac{N_{\text{syllables}}}{N_{\text{words}}}\right) - 15.59$$
+
+### 3.6 LinguisticAnalyzer (`engine/rightforge/analysis/linguistic.py`)
+Composite pipeline orchestrating `LexicalAnalyzer`, `SentenceAnalyzer`, and `PunctuationAnalyzer`.
 
 ---
 
 ## 4. API Endpoints
 
-### 4.1 Basic Analysis
-* **Endpoint**: `POST /analysis/basic`
-* **Request**: `{"text": "..."}`
-* **Response**: `AnalysisResult` with surface metrics.
-
-### 4.2 Linguistic Analysis
-* **Endpoint**: `POST /analysis/linguistic`
-* **Request**: `{"text": "..."}`
-* **Response**: `AnalysisResult` with lexical, sentence, and punctuation metrics.
+* **POST /analysis/basic**: Surface text statistics.
+* **POST /analysis/linguistic**: Lexical diversity, sentence distribution, and punctuation analysis.
+* **POST /analysis/stylometry**: Vocabulary invariants, function word usage, and readability scores.

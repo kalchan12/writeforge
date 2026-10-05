@@ -20,44 +20,54 @@ RightForge is a local-first writing analysis and author-style research platform.
 
 ### Phase 1 — Basic Document Statistics
 - [x] **Deterministic Text Segmentation**: Implemented `split_paragraphs`, `split_sentences`, and `tokenize_words` in `engine/rightforge/text/segmentation.py`.
-- [x] **Basic Text Analyzer**: Implemented `BasicTextAnalyzer` in `engine/rightforge/analysis/basic.py` producing 10 surface metrics.
+- [x] **Basic Text Analyzer**: Implemented `BasicTextAnalyzer` producing 10 surface metrics.
 - [x] **API Endpoint**: Exposed `POST /analysis/basic`.
 - [x] **Unit & Integration Tests**: Deterministic unit and endpoint tests.
 
 ### Phase 2 — Linguistic Metrics
 - [x] **Composable Analyzer Framework**: Defined `BaseAnalyzer` contract in `engine/rightforge/analysis/base.py`.
-- [x] **Lexical Analyzer**: Implemented `LexicalAnalyzer` (`unique_word_count`, `type_token_ratio`, `root_type_token_ratio`, `average_word_length`, `long_word_ratio`).
-- [x] **Sentence Analyzer**: Implemented `SentenceAnalyzer` (`sentence_count`, `sentence_length_mean`, `sentence_length_variance`, `sentence_length_std_dev`, `shortest_sentence_length`, `longest_sentence_length`).
-- [x] **Punctuation Analyzer**: Implemented `PunctuationAnalyzer` (frequencies for commas, periods, semicolons, colons, parentheses, question marks, exclamation marks, dashes, quotes, and punctuation density per char and per word).
-- [x] **Composite Pipeline**: Implemented `LinguisticAnalyzer` in `engine/rightforge/analysis/linguistic.py` orchestrating constituent modular analyzers into a unified `AnalysisResult`.
-- [x] **API Endpoint**: Exposed `POST /analysis/linguistic` in `apps/api/main.py`.
-- [x] **Deterministic Tests**: Added 14 new tests across lexical, sentence, punctuation, composite, and API integration suites (**43 tests total, 100% passing**).
+- [x] **Modular Analyzers**:
+  - `LexicalAnalyzer`: unique words, TTR, Root TTR, long-word ratio.
+  - `SentenceAnalyzer`: mean sentence length, variance, std dev, min/max length.
+  - `PunctuationAnalyzer`: frequencies for commas, periods, semicolons, colons, parentheses, question marks, exclamation marks, dashes, quotes, and punctuation density.
+  - `LinguisticAnalyzer`: composite pipeline.
+- [x] **API Endpoint**: Exposed `POST /analysis/linguistic`.
+- [x] **Tests**: Deterministic unit and integration tests.
+
+### Phase 3 — Stylometric Analysis
+- [x] **Syllable Estimation**: Implemented phonetic rule-based `count_syllables` in `engine/rightforge/text/syllables.py`.
+- [x] **Function Words Lexicon**: Standard closed-class category dictionaries in `engine/rightforge/text/function_words.py`.
+- [x] **Stylometry Analyzer**: Implemented `StylometryAnalyzer` in `engine/rightforge/analysis/stylometry.py`:
+  - Vocabulary richness: Hapax legomena ($V_1$), Dis legomena ($V_2$), Yule's K characteristic, Simpson's D dominance and diversity indices.
+  - Function word distributions: overall ratio, prepositions, pronouns, conjunctions, auxiliary verbs, determiners.
+  - Readability indices: Flesch Reading Ease and Flesch-Kincaid Grade Level.
+- [x] **API Endpoint**: Exposed `POST /analysis/stylometry` in `apps/api/main.py`.
+- [x] **Deterministic Tests**: Added 13 new unit and integration tests (**56 tests total, 100% passing**).
 - [x] **Documentation**: Updated `docs/specifications/ANALYZER.md` and `docs/ai/ARCHITECTURE.md`.
 
 ---
 
 ## 3. Current State
 
-- **Active Phase**: Phase 2 Complete.
+- **Active Phase**: Phase 3 Complete.
 - **Engine**: Pure-Python modular analyzers with zero external ML dependencies.
-- **Tests**: 43 passed in pytest in ~1.3s.
-- **Service**: FastAPI server exposing `GET /health`, `POST /analysis/basic`, and `POST /analysis/linguistic`.
+- **Tests**: 56 passed in pytest in ~1.4s.
+- **Service**: FastAPI server exposing `GET /health`, `POST /analysis/basic`, `POST /analysis/linguistic`, and `POST /analysis/stylometry`.
 
 ---
 
 ## 4. Known Limitations
 
-- **No Stylometric Fingerprinting Yet**: Authorship invariants, function word distributions, and Yule's K are scheduled for Phase 3.
+- **No Multi-Document Author Profiles Yet**: Individual document analysis is complete; aggregating multiple documents into a baseline profile with variance models is scheduled for Phase 4.
 - **No Persistence**: Storage remains in-memory.
 - **No Machine Learning / LLMs**: Explicitly deferred by architectural contract until metric foundations are complete.
 
 ---
 
-## 5. Next Milestone: Phase 3 — Stylometric Analysis
+## 5. Next Milestone: Phase 4 — Writing Profiles
 
-The next bounded objective will implement authorial fingerprinting and stylometry metrics:
-1. **Function word distribution**: Relative frequencies of closed-class function words (prepositions, conjunctions, pronouns, auxiliary verbs).
-2. **Vocabulary richness metrics**: Yule's K characteristic ($K = 10^4 \cdot \frac{\sum i^2 V_i - N}{N^2}$), Simpson's D index, Hapax legomena and Dis legomena counts.
-3. **Readability indices**: Flesch Reading Ease and Flesch-Kincaid Grade Level (using deterministic syllable estimation).
-4. `StylometryAnalyzer` component and `POST /analysis/stylometry` endpoint.
-5. Deterministic unit and integration tests.
+The next bounded objective will implement author profile aggregation:
+1. **Author Profile Domain Model**: Define `AuthorProfile` and `MetricBaseline` (mean, variance, min, max, confidence interval) in `engine/rightforge/models/profile.py`.
+2. **Profile Engine**: Implement `ProfileAggregator` taking multiple `AnalysisResult` / `Document` inputs and generating an `AuthorProfile`.
+3. **API Endpoints**: `POST /profiles/create` to construct an author profile from sample texts.
+4. **Deterministic Tests**: Coverage for profile construction, metric variance bounds, and edge cases.
