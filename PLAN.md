@@ -37,38 +37,54 @@ RightForge is a local-first writing analysis and author-style research platform.
 - [x] **Tests & Docs**: Deterministic tests and specification updates.
 
 ### Phase 4 — Writing Profiles
-- [x] **Profile Domain Models**: `AuthorProfile` and `MetricBaseline` in `engine/rightforge/models/profile.py` supporting empirical distribution statistics, z-score calculations, and deviation boundary evaluations.
-- [x] **Profile Aggregation Engine**: Implemented `ProfileAggregator` in `engine/rightforge/profiles/aggregator.py` executing multi-tier analysis across document corpora and computing exact statistical baselines.
-- [x] **API Endpoint**: Exposed `POST /profiles/create` in `apps/api/main.py`.
-- [x] **Deterministic Tests**: Added 9 new unit and integration tests (**65 tests total, 100% passing**).
-- [x] **Documentation**: Created `docs/specifications/WRITING_PROFILE.md` and updated `docs/ai/ARCHITECTURE.md`.
+- [x] **Profile Domain Models**: `AuthorProfile` and `MetricBaseline` in `engine/rightforge/models/profile.py`.
+- [x] **Profile Aggregation Engine**: `ProfileAggregator` in `engine/rightforge/profiles/aggregator.py`.
+- [x] **API Endpoint**: `POST /profiles/create`.
+- [x] **Tests & Docs**: Deterministic tests and specification updates.
+
+### Phase 5 — Profile Comparison & Consistency Scoring
+- [x] **Comparison Domain Models**: `MetricDeviation` and `ConsistencyReport` in `engine/rightforge/models/comparison.py`.
+- [x] **Profile Comparator Engine**: `ProfileComparator` in `engine/rightforge/profiles/comparator.py`:
+  - Normalized Gaussian-decay fidelity scoring: $s_i = \exp\left(-\frac{1}{2} \left(\frac{|z_i|}{2.0}\right)^2\right)$.
+  - Bounded composite consistency score in $[0.0, 1.0]$.
+  - Automatic outlier detection ($|z| > \text{threshold}$).
+  - Qualitative alignment assessment (high, moderate, low, divergent).
+- [x] **API Endpoint**: `POST /profiles/compare`.
+- [x] **Deterministic Tests**: Added 4 unit and integration tests (**69 tests total, 100% passing**).
+- [x] **Documentation**: Updated `docs/specifications/WRITING_PROFILE.md` and `docs/ai/ARCHITECTURE.md`.
 
 ---
 
 ## 3. Current State
 
-- **Active Phase**: Phase 4 Complete.
-- **Engine**: Pure-Python analysis and author profile aggregation.
-- **Tests**: 65 passed in pytest in ~1.5s.
-- **Service**: FastAPI server exposing `GET /health`, `POST /analysis/basic`, `POST /analysis/linguistic`, `POST /analysis/stylometry`, and `POST /profiles/create`.
+- **Active Phase**: Phase 5 Complete.
+- **Engine**: Pure-Python analysis, profile creation, and automated style consistency comparison.
+- **Tests**: 69 passed in pytest in ~1.6s.
+- **Service**: FastAPI server exposing:
+  - `GET /health`
+  - `POST /analysis/basic`
+  - `POST /analysis/linguistic`
+  - `POST /analysis/stylometry`
+  - `POST /profiles/create`
+  - `POST /profiles/compare`
 
 ---
 
 ## 4. Known Limitations
 
-- **No Document-to-Profile Comparison Yet**: Profiles can be generated, but automated comparative scoring (evaluating a new draft against an existing profile and generating consistency scores) is scheduled for Phase 5.
-- **No Persistence**: Profiles and documents remain in-memory; local SQLite storage will be introduced in later phases.
-- **No Machine Learning / LLMs**: Explicitly deferred by architectural contract until metric foundations are complete.
+- **No Semantic Flow Analysis Yet**: Style and surface invariants are modeled, but semantic topic cohesion, sentence-to-sentence transition flow, and lexical chaining are scheduled for Phase 6.
+- **No Persistence**: Storage remains in-memory; SQLite persistence scheduled for full application phase.
+- **No Machine Learning / LLMs**: Explicitly deferred by architectural contract until metric and semantic foundations are complete.
 
 ---
 
-## 5. Next Milestone: Phase 5 — Profile Comparison & Consistency Scoring
+## 5. Next Milestone: Phase 6 — Semantic Similarity & Coherence
 
-The next bounded objective will implement document-to-profile comparison:
-1. **Comparison Domain Model**: Define `ComparisonResult`, `MetricDeviation`, and `ConsistencyReport` in `engine/rightforge/models/comparison.py`.
-2. **Profile Comparator Engine**: Implement `ProfileComparator` in `engine/rightforge/profiles/comparator.py`:
-   - Compute individual metric z-scores and deviation flags.
-   - Calculate aggregated consistency score ($0.0 - 1.0$) using weighted composite metric distance.
-   - Identify significant stylistic outliers (e.g. abrupt shifts in function word usage or sentence cadence).
-3. **API Endpoint**: `POST /profiles/compare` (evaluates a document against a target profile).
-4. **Deterministic Tests**: Verification of exact deviation scores, boundary flags, and consistency ratings.
+The next bounded objective will implement semantic and coherence analysis:
+1. **Semantic Models**: `SemanticCoherenceReport`, `TransitionScore` in `engine/rightforge/models/semantics.py`.
+2. **Lexical Cohesion & Flow Engine**: `SemanticCoherenceAnalyzer` in `engine/rightforge/analysis/semantics.py`:
+   - Paragraph-to-paragraph and sentence-to-sentence lexical overlap (Jaccard and Dice similarity of content words).
+   - Lexical chaining and noun phrase repetition tracking.
+   - Transition smoothness scoring.
+3. **API Endpoint**: `POST /analysis/coherence`.
+4. **Deterministic Tests**: Verifying flow scores across coherent vs. disjointed texts.
