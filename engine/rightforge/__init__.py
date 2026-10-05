@@ -14,11 +14,13 @@ from rightforge.analysis import (
 from rightforge.models import (
     AnalysisResult,
     AuthorProfile,
+    ConsistencyReport,
     Document,
     MetricBaseline,
+    MetricDeviation,
     MetricResult,
 )
-from rightforge.profiles import ProfileAggregator
+from rightforge.profiles import ProfileAggregator, ProfileComparator
 
 __all__ = [
     "__version__",
@@ -26,12 +28,15 @@ __all__ = [
     "AuthorProfile",
     "BaseAnalyzer",
     "BasicTextAnalyzer",
+    "ConsistencyReport",
     "Document",
     "LexicalAnalyzer",
     "LinguisticAnalyzer",
     "MetricBaseline",
+    "MetricDeviation",
     "MetricResult",
     "ProfileAggregator",
+    "ProfileComparator",
     "PunctuationAnalyzer",
     "SentenceAnalyzer",
     "StylometryAnalyzer",
