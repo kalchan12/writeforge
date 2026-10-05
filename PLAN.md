@@ -44,27 +44,34 @@ RightForge is a local-first writing analysis and author-style research platform.
 
 ### Phase 5 — Profile Comparison & Consistency Scoring
 - [x] **Comparison Domain Models**: `MetricDeviation` and `ConsistencyReport` in `engine/rightforge/models/comparison.py`.
-- [x] **Profile Comparator Engine**: `ProfileComparator` in `engine/rightforge/profiles/comparator.py`:
-  - Normalized Gaussian-decay fidelity scoring: $s_i = \exp\left(-\frac{1}{2} \left(\frac{|z_i|}{2.0}\right)^2\right)$.
-  - Bounded composite consistency score in $[0.0, 1.0]$.
-  - Automatic outlier detection ($|z| > \text{threshold}$).
-  - Qualitative alignment assessment (high, moderate, low, divergent).
+- [x] **Profile Comparator Engine**: `ProfileComparator` in `engine/rightforge/profiles/comparator.py`.
 - [x] **API Endpoint**: `POST /profiles/compare`.
-- [x] **Deterministic Tests**: Added 4 unit and integration tests (**69 tests total, 100% passing**).
-- [x] **Documentation**: Updated `docs/specifications/WRITING_PROFILE.md` and `docs/ai/ARCHITECTURE.md`.
+- [x] **Tests & Docs**: Deterministic tests and specification updates.
+
+### Phase 6 — Semantic Similarity & Coherence
+- [x] **Semantic Domain Models**: `SemanticCoherenceReport` and `TransitionScore` in `engine/rightforge/models/semantics.py`.
+- [x] **Lexical Cohesion & Flow Engine**: Implemented `SemanticCoherenceAnalyzer` in `engine/rightforge/analysis/semantics.py`:
+  - Segment-by-segment content word extraction (excluding function words).
+  - Jaccard similarity and overlap coefficients for adjacent sentences and paragraphs.
+  - Document-wide lexical chaining tracking content word repetition rates across paragraphs.
+  - Abrupt transition / topic shift identification.
+- [x] **API Endpoint**: Exposed `POST /analysis/coherence`.
+- [x] **Deterministic Tests**: Added 8 unit and integration tests (**77 tests total, 100% passing**).
+- [x] **Documentation**: Updated `docs/specifications/ANALYZER.md` and `docs/ai/ARCHITECTURE.md`.
 
 ---
 
 ## 3. Current State
 
-- **Active Phase**: Phase 5 Complete.
-- **Engine**: Pure-Python analysis, profile creation, and automated style consistency comparison.
-- **Tests**: 69 passed in pytest in ~1.6s.
+- **Active Phase**: Phase 6 Complete.
+- **Engine**: Pure-Python analysis, profiling, comparison, and semantic flow measurement.
+- **Tests**: 77 passed in pytest in ~1.7s.
 - **Service**: FastAPI server exposing:
   - `GET /health`
   - `POST /analysis/basic`
   - `POST /analysis/linguistic`
   - `POST /analysis/stylometry`
+  - `POST /analysis/coherence`
   - `POST /profiles/create`
   - `POST /profiles/compare`
 
@@ -72,19 +79,16 @@ RightForge is a local-first writing analysis and author-style research platform.
 
 ## 4. Known Limitations
 
-- **No Semantic Flow Analysis Yet**: Style and surface invariants are modeled, but semantic topic cohesion, sentence-to-sentence transition flow, and lexical chaining are scheduled for Phase 6.
-- **No Persistence**: Storage remains in-memory; SQLite persistence scheduled for full application phase.
-- **No Machine Learning / LLMs**: Explicitly deferred by architectural contract until metric and semantic foundations are complete.
+- **No Classical ML Pipelines Yet**: Stylometric and coherence metrics are extracted deterministically; vectorization pipelines and supervised authorship/style classifiers are scheduled for Phase 7.
+- **No Persistence**: Storage remains in-memory.
+- **No Heavy Deep Learning**: Explicitly deferred to Phase 8 (Transformer-Based Research).
 
 ---
 
-## 5. Next Milestone: Phase 6 — Semantic Similarity & Coherence
+## 5. Next Milestone: Phase 7 — Classical ML Experiments
 
-The next bounded objective will implement semantic and coherence analysis:
-1. **Semantic Models**: `SemanticCoherenceReport`, `TransitionScore` in `engine/rightforge/models/semantics.py`.
-2. **Lexical Cohesion & Flow Engine**: `SemanticCoherenceAnalyzer` in `engine/rightforge/analysis/semantics.py`:
-   - Paragraph-to-paragraph and sentence-to-sentence lexical overlap (Jaccard and Dice similarity of content words).
-   - Lexical chaining and noun phrase repetition tracking.
-   - Transition smoothness scoring.
-3. **API Endpoint**: `POST /analysis/coherence`.
-4. **Deterministic Tests**: Verifying flow scores across coherent vs. disjointed texts.
+The next bounded objective will implement classical machine learning feature extraction and classification baselines:
+1. **Feature Vectorizer**: `StylometricVectorizer` in `engine/rightforge/ml/vectorizer.py` extracting normalized numerical feature arrays from documents.
+2. **Evaluation Harness**: Experiment runner script in `scripts/evaluate_classifier.py` using scikit-learn (RandomForest / LogisticRegression / SVM) to classify sample authorship corpora.
+3. **Research Notes**: Document empirical results and feature importance rankings in `docs/research/EXPERIMENTS.md`.
+4. **Deterministic Tests**: Verifying vectorizer dimension consistency, zero-variance handling, and model reproducibility.
