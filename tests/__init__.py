@@ -1,0 +1,1 @@
+"""RightForge test suite."""
