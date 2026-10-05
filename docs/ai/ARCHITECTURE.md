@@ -35,32 +35,29 @@ Strict rules govern dependencies within the repository:
 
 | Component | Path | Responsibility | Allowed Dependencies |
 | :--- | :--- | :--- | :--- |
-| **Domain Models** | `engine/rightforge/models/` | Base entities: `Document`, `MetricResult`, `AnalysisResult` | Pydantic, Python stdlib |
+| **Domain Models** | `engine/rightforge/models/` | Base entities: `Document`, `MetricResult`, `AnalysisResult`, `AuthorProfile`, `MetricBaseline` | Pydantic, Python stdlib |
 | **Text Processing** | `engine/rightforge/text/` | Deterministic segmentation, syllable estimation, function word dictionaries | Python stdlib, regex |
 | **Analysis** | `engine/rightforge/analysis/` | Modular analyzers (`BaseAnalyzer`, `BasicTextAnalyzer`, `LexicalAnalyzer`, `SentenceAnalyzer`, `PunctuationAnalyzer`, `StylometryAnalyzer`, `LinguisticAnalyzer`) | `rightforge.models`, `rightforge.text` |
+| **Profiles** | `engine/rightforge/profiles/` | Multi-document profile aggregation (`ProfileAggregator`) | `rightforge.models`, `rightforge.analysis` |
 | **Core Utilities** | `engine/rightforge/core/` | Base classes, configuration primitives | Python stdlib |
-| **API Application** | `apps/api/` | HTTP routing, request validation, error formatting (`GET /health`, `POST /analysis/basic`, `POST /analysis/linguistic`, `POST /analysis/stylometry`) | FastAPI, Pydantic, `rightforge.*` |
+| **API Application** | `apps/api/` | HTTP routing, request validation (`GET /health`, `POST /analysis/*`, `POST /profiles/create`) | FastAPI, Pydantic, `rightforge.*` |
 | **Frontend Web** | `apps/web/` | Visual interface, interactive feedback | React, Next.js, TypeScript |
 
-## 4. Active Architecture (Phase 3)
+## 4. Active Architecture (Phase 4)
 
 * `apps/api/main.py`:
   * `GET /health`: Service health verification.
   * `POST /analysis/basic`: Surface document statistics.
   * `POST /analysis/linguistic`: Lexical diversity, sentence rhythm, and punctuation metrics.
-  * `POST /analysis/stylometry`: Authorial invariants (Yule's K, Simpson's D, Hapax/Dis legomena), function word ratios, and readability scores.
-* `engine/rightforge/analysis/`:
-  * `base.py`: Abstract `BaseAnalyzer` contract.
-  * `basic.py`: Surface metrics analyzer.
-  * `lexical.py`: Vocabulary richness, TTR, Root TTR, long-word ratio.
-  * `sentence.py`: Sentence length distributions, variance, and standard deviation.
-  * `punctuation.py`: Mark frequencies and densities.
-  * `stylometry.py`: Stylometric invariants, vocabulary richness, function word usage, and readability indices.
-  * `linguistic.py`: Composite multi-analyzer pipeline.
-* `engine/rightforge/text/`:
-  * `segmentation.py`: Paragraph, sentence, and word tokenization.
-  * `syllables.py`: Phonetic syllable counting rules.
-  * `function_words.py`: Standard closed-class function word lexicons.
+  * `POST /analysis/stylometry`: Stylometric invariants, vocabulary richness, and readability.
+  * `POST /profiles/create`: Constructs multi-document `AuthorProfile` with metric baselines.
+* `engine/rightforge/models/`:
+  * `document.py`: `Document`, `MetricResult`, `AnalysisResult`.
+  * `profile.py`: `AuthorProfile`, `MetricBaseline`.
+* `engine/rightforge/profiles/`:
+  * `aggregator.py`: `ProfileAggregator` compiling multi-document analyses into empirical distributions.
+* `engine/rightforge/analysis/`: Modular and composite deterministic text analyzers.
+* `engine/rightforge/text/`: Segmentation, syllables, and function words.
 
 ## 5. Future Target Architecture (Reference Only)
 
