@@ -4,7 +4,11 @@ from typing import Any
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-from rightforge.analysis import BasicTextAnalyzer, LinguisticAnalyzer
+from rightforge.analysis import (
+    BasicTextAnalyzer,
+    LinguisticAnalyzer,
+    StylometryAnalyzer,
+)
 from rightforge.models import AnalysisResult, Document
 
 app = FastAPI(
@@ -54,4 +58,12 @@ def analyze_linguistic(request: TextAnalysisRequest) -> AnalysisResult:
     """Analyze a document and compute modular linguistic metrics (lexical, sentence, punctuation)."""
     doc = Document(text=request.text, metadata=request.metadata)
     analyzer = LinguisticAnalyzer()
+    return analyzer.analyze_document(doc)
+
+
+@app.post("/analysis/stylometry", response_model=AnalysisResult)
+def analyze_stylometry(request: TextAnalysisRequest) -> AnalysisResult:
+    """Analyze a document and compute stylometric metrics (vocabulary richness, function words, readability)."""
+    doc = Document(text=request.text, metadata=request.metadata)
+    analyzer = StylometryAnalyzer()
     return analyzer.analyze_document(doc)
