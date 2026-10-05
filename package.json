@@ -4,6 +4,7 @@
   "description": "RightForge workspace root",
   "scripts": {
     "dev": "npm run dev --prefix apps/web",
+    "dev:all": "./scripts/dev.sh",
     "build": "npm run build --prefix apps/web",
     "start": "npm run start --prefix apps/web",
     "lint": "npm run lint --prefix apps/web"
