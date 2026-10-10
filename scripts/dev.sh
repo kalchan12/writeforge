@@ -41,10 +41,18 @@ cleanup() {
     if [ -n "$WEB_PID" ] && kill -0 "$WEB_PID" 2>/dev/null; then
         kill "$WEB_PID" 2>/dev/null || true
     fi
+    if command -v fuser >/dev/null 2>&1; then
+        fuser -k 8000/tcp 3000/tcp 2>/dev/null || true
+    fi
     wait 2>/dev/null || true
     echo "All services stopped."
 }
 trap cleanup SIGINT SIGTERM EXIT
+
+# Pre-flight check: ensure ports 8000 and 3000 are free from previous runs
+if command -v fuser >/dev/null 2>&1; then
+    fuser -k 8000/tcp 3000/tcp 2>/dev/null || true
+fi
 
 # 3. Start FastAPI backend
 echo "Starting FastAPI Backend on http://localhost:8000 ..."
