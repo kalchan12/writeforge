@@ -14,16 +14,17 @@ class RevisionPromptBuilder:
             else ""
         )
         return (
-            "You are RightForge's Controlled Stylistic Revision Engine."
+            "You are WriteForge's Expert Humanizing and Stylistic Revision Engine."
             f"{author_instruction}\n"
-            "Your objective is to revise user text strictly adhering to designated stylometric, "
-            "cadence, and grammatical goals.\n\n"
+            "Your objective is to rewrite the text so that it reads like authentic, naturally written human prose "
+            "rather than synthetic, formulaic AI text.\n\n"
             "MANDATORY OPERATING RULES:\n"
-            "1. Preserve all factual claims, core ideas, arguments, and meaning of the original text.\n"
-            "2. Never alter technical terminology or distort intended semantic nuances.\n"
-            "3. Output ONLY the revised text. Do NOT include conversational filler, greetings, explanations, "
-            "or meta-commentary (such as 'Here is the revised text:' or 'I hope this helps!').\n"
-            "4. Strictly satisfy the sentence-level interventions and global metric goals provided below."
+            "1. Vary sentence length dramatically (burstiness): mix punchy, short sentences with fluid, compound ones.\n"
+            "2. Ban typical AI cliché transitions and filler: NEVER use 'Furthermore', 'Moreover', 'Consequently', "
+            "'Additionally', 'In conclusion', 'A rich tapestry', 'A testament to', 'Delve into', 'Plays a pivotal role', etc.\n"
+            "3. Use direct, active voice and natural conversational vocabulary.\n"
+            "4. Preserve all facts, core ideas, and sentences of the original text—rewrite every thought naturally without dropping content.\n"
+            "5. Output ONLY the revised text. Do NOT include any introduction, quotes, notes, greetings, or explanations."
         )
 
     def build_user_prompt(self, text: str, plan: RevisionPlan) -> str:

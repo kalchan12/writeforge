@@ -12,7 +12,7 @@ from rightforge.analysis import (
     SemanticCoherenceAnalyzer,
     StylometryAnalyzer,
 )
-from rightforge.llm import MockLLMProvider, OllamaProvider
+from rightforge.llm import AntigravityCLIProvider, MockLLMProvider, OllamaProvider
 from rightforge.models import (
     AIDetectionReport,
     AnalysisResult,
@@ -128,11 +128,16 @@ class RevisionExecuteRequest(BaseModel):
     profile: AuthorProfile | None = Field(
         default=None, description="Optional target AuthorProfile"
     )
+    provider: str = Field(
+        default="antigravity",
+        description="Inference provider engine: 'antigravity' (Gemini via agy CLI), 'ollama', or 'mock'",
+    )
     model: str = Field(
-        default="llama3", description="Local LLM model name (e.g. llama3, mistral, qwen2.5)"
+        default="gemini-3.8-flash-low",
+        description="Model name (e.g. gemini-3.8-flash-low, gemini-3.7-flash-medium, llama3)",
     )
     endpoint_url: str = Field(
-        default="http://localhost:11434", description="Base URL of the local inference daemon"
+        default="http://localhost:11434", description="Base URL for Ollama daemon if using ollama provider"
     )
     use_mock: bool = Field(
         default=False,
@@ -259,9 +264,9 @@ def plan_revision(request: RevisionPlanRequest) -> RevisionPlan:
 def execute_revision(request: RevisionExecuteRequest) -> RevisionExecutionResult:
     """Execute a style-conditioned revision via local LLM, verify metric shifts, and log execution."""
     doc = Document(text=request.text, metadata=request.metadata)
-    if request.use_mock:
+    if request.use_mock or request.provider == "mock":
         provider = MockLLMProvider()
-    else:
+    elif request.provider == "ollama":
         ollama = OllamaProvider(
             model=request.model,
             base_url=request.endpoint_url,
@@ -269,7 +274,16 @@ def execute_revision(request: RevisionExecuteRequest) -> RevisionExecutionResult
         if ollama.is_available():
             provider = ollama
         else:
-            # Fallback to local rule-governed TextHumanizer pipeline if Ollama is not running
+            provider = MockLLMProvider()
+    else:
+        # Default: Gemini via Antigravity CLI ('agy')
+        agy = AntigravityCLIProvider(
+            model=request.model or "gemini-3.8-flash-low",
+        )
+        if agy.is_available():
+            provider = agy
+        else:
+            # Fallback to local rule-governed TextHumanizer pipeline if CLI binary not found
             provider = MockLLMProvider()
 
     executor = RevisionExecutor(provider=provider)

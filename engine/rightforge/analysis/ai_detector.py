@@ -81,57 +81,53 @@ class AIDetector(BaseAnalyzer):
         else:
             ppl_ratio = 1.0
 
-        # ── Signal 1: Burstiness (30%) ──
-        # Low burstiness = AI-like uniform cadence. High = human-like variation.
-        # midpoint 0.25, steepness -15 (inverted: low burstiness → high AI score)
-        burstiness_score = _inverse_sigmoid_score(burstiness, 0.25, 12.0)
+        # ── Signal 1: Burstiness (Cadence Variation) (25%) ──
+        # Synthetic text with uniform length/structure has low burstiness (<0.10)
+        # Dynamic human texts typically fall around 0.12 - 0.35+
+        burstiness_score = _inverse_sigmoid_score(burstiness, 0.14, 18.0)
 
-        # ── Signal 2: Sentence length std dev (20%) ──
-        # Low std dev = AI-like uniformity. High = human variation.
-        sent_std_score = _inverse_sigmoid_score(sent_len_std, 5.0, 0.6)
+        # ── Signal 2: Sentence length std dev (25%) ──
+        # Highly diagnostic of AI: LLMs write sentences of similar lengths (std dev < 2.0).
+        # Human writing fluctuates with short & long sentences (std dev > 5.0).
+        sent_std_score = _inverse_sigmoid_score(sent_len_std, 4.0, 0.9)
 
-        # ── Signal 3: Perplexity ratio (15%) ──
-        # Low ratio (all sentences similar PPL) = AI. High ratio = human.
-        ppl_ratio_score = _inverse_sigmoid_score(ppl_ratio, 2.0, 1.5)
+        # ── Signal 3: Perplexity range ratio (15%) ──
+        # Uniform AI text clusters tightly (ratio < 1.25). Human text has diverse clauses (> 1.4).
+        ppl_ratio_score = _inverse_sigmoid_score(ppl_ratio, 1.35, 6.0)
 
         # ── Signal 4: Type-Token Ratio (10%) ──
-        # Very high TTR (>0.85) in moderate-length text = AI-like (avoids repetition).
-        # Normal human text has moderate TTR with natural repetition.
-        ttr_score = _sigmoid_score(ttr, 0.75, 8.0)
+        # Very high TTR (>0.90) in moderate-length text = AI-like avoidance of natural repetition.
+        ttr_score = _sigmoid_score(ttr, 0.88, 12.0)
 
         # ── Signal 5: Function word ratio (10%) ──
-        # AI text tends to have lower function word ratio (avoids filler).
-        # Human text typically 0.40-0.55.
-        func_score = _inverse_sigmoid_score(func_word_ratio, 0.40, 8.0)
+        # AI text tends to have lower function word ratio (<0.32). Human writing 0.38 - 0.55.
+        func_score = _inverse_sigmoid_score(func_word_ratio, 0.35, 10.0)
 
         # ── Signal 6: Coherence uniformity (10%) ──
-        # Very high uniform coherence = AI-like. Some roughness = human.
-        # For single paragraphs, coherence defaults to 1.0 which shouldn't penalize.
         if coherence_report.paragraph_count > 1:
-            coherence_score = _sigmoid_score(mean_para_coherence, 0.15, 10.0)
+            coherence_score = _sigmoid_score(mean_para_coherence, 0.18, 10.0)
         else:
-            coherence_score = 0.4  # neutral for single-paragraph text
+            coherence_score = 0.35  # neutral for single-paragraph text
 
         # ── Signal 7: Readability clustering (5%) ──
-        # AI text clusters around grade 10-12. Distance from this cluster = more human.
         grade_distance = abs(flesch_grade - 11.0)
-        readability_score = _inverse_sigmoid_score(grade_distance, 3.0, 0.8)
+        readability_score = _inverse_sigmoid_score(grade_distance, 3.5, 0.8)
 
         # Build signal list
         signals = [
             AISignal(
-                name="Burstiness (Cadence Variation)",
-                raw_value=round(burstiness, 4),
-                sub_score=round(burstiness_score, 3),
-                weight=0.30,
-                description="Sentence-to-sentence perplexity variation. Low = uniform/AI-like.",
-            ),
-            AISignal(
                 name="Sentence Length Variation",
                 raw_value=round(sent_len_std, 2),
                 sub_score=round(sent_std_score, 3),
-                weight=0.20,
-                description="Standard deviation of sentence lengths. Low = uniform/AI-like.",
+                weight=0.30,
+                description="Standard deviation of sentence lengths. Low (<2.5) = uniform/AI-like.",
+            ),
+            AISignal(
+                name="Burstiness (Cadence Variation)",
+                raw_value=round(burstiness, 4),
+                sub_score=round(burstiness_score, 3),
+                weight=0.15,
+                description="Sentence-to-sentence perplexity variation. Low = uniform/AI-like.",
             ),
             AISignal(
                 name="Perplexity Range",
@@ -141,6 +137,13 @@ class AIDetector(BaseAnalyzer):
                 description="Max-to-min sentence perplexity ratio. Low = uniform/AI-like.",
             ),
             AISignal(
+                name="Function Word Usage",
+                raw_value=round(func_word_ratio, 4),
+                sub_score=round(func_score, 3),
+                weight=0.20,
+                description="Ratio of function words. Low (<0.32) = AI-like (avoids filler words).",
+            ),
+            AISignal(
                 name="Vocabulary Uniformity",
                 raw_value=round(ttr, 4),
                 sub_score=round(ttr_score, 3),
@@ -148,17 +151,10 @@ class AIDetector(BaseAnalyzer):
                 description="Type-token ratio. Very high = AI-like avoidance of repetition.",
             ),
             AISignal(
-                name="Function Word Usage",
-                raw_value=round(func_word_ratio, 4),
-                sub_score=round(func_score, 3),
-                weight=0.10,
-                description="Ratio of function words. Low = AI-like (avoids filler words).",
-            ),
-            AISignal(
                 name="Coherence Uniformity",
                 raw_value=round(mean_para_coherence, 4),
                 sub_score=round(coherence_score, 3),
-                weight=0.10,
+                weight=0.05,
                 description="Paragraph transition uniformity. Very uniform = AI-like.",
             ),
             AISignal(

@@ -46,7 +46,7 @@ export default function Page() {
     setError(null);
     try {
       const [result, origReport] = await Promise.all([
-        executeRevision(text, { useMock: true }),
+        executeRevision(text, { provider: "antigravity", model: "gemini-3.8-flash-low", useMock: false }),
         aiReport ? Promise.resolve(aiReport) : detectAI(text).catch(() => null),
       ]);
       setRevisionResult(result);

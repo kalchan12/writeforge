@@ -142,6 +142,7 @@ export async function executeRevision(
   text: string,
   options: {
     profile?: AuthorProfile | null;
+    provider?: string;
     model?: string;
     endpointUrl?: string;
     useMock?: boolean;
@@ -151,7 +152,8 @@ export async function executeRevision(
   return postJson<RevisionExecutionResult>("/revision/execute", {
     text,
     profile: options.profile || null,
-    model: options.model || "llama3",
+    provider: options.provider || "antigravity",
+    model: options.model || "gemini-3.8-flash-low",
     endpoint_url: options.endpointUrl || "http://localhost:11434",
     use_mock: options.useMock ?? false,
     outlier_threshold: options.outlierThreshold ?? 2.0,
