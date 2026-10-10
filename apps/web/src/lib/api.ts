@@ -12,6 +12,23 @@ import {
   SemanticCoherenceReport,
 } from "../types/api";
 
+export interface AISignal {
+  name: string;
+  raw_value: number;
+  sub_score: number;
+  weight: number;
+  description: string;
+}
+
+export interface AIDetectionReport {
+  ai_score: number;
+  ai_score_percent: number;
+  verdict: string;
+  confidence: string;
+  signals: AISignal[];
+  summary: string;
+}
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -139,4 +156,11 @@ export async function executeRevision(
     use_mock: options.useMock ?? false,
     outlier_threshold: options.outlierThreshold ?? 2.0,
   });
+}
+
+export async function detectAI(
+  text: string,
+  metadata: Record<string, unknown> = {}
+): Promise<AIDetectionReport> {
+  return postJson<AIDetectionReport>("/analysis/ai-detect", { text, metadata });
 }

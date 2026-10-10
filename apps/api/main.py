@@ -1,9 +1,11 @@
 import os
 from typing import Any
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from rightforge.analysis import (
+    AIDetector,
     BasicTextAnalyzer,
     LinguisticAnalyzer,
     PerplexityAnalyzer,
@@ -12,6 +14,7 @@ from rightforge.analysis import (
 )
 from rightforge.llm import MockLLMProvider, OllamaProvider
 from rightforge.models import (
+    AIDetectionReport,
     AnalysisResult,
     AuthorProfile,
     ConsistencyReport,
@@ -29,6 +32,19 @@ app = FastAPI(
     title="RightForge API",
     description="Local-first writing analysis and author-style research platform API",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 db_path = os.environ.get("RIGHTFORGE_DB_PATH", "data/writeforge.db")
@@ -176,6 +192,14 @@ def analyze_perplexity(request: TextAnalysisRequest) -> PerplexityReport:
     doc = Document(text=request.text, metadata=request.metadata)
     analyzer = PerplexityAnalyzer()
     return analyzer.analyze_perplexity(doc)
+
+
+@app.post("/analysis/ai-detect", response_model=AIDetectionReport)
+def detect_ai(request: TextAnalysisRequest) -> AIDetectionReport:
+    """Compute composite AI detection probability score from multi-signal analysis."""
+    doc = Document(text=request.text, metadata=request.metadata)
+    detector = AIDetector()
+    return detector.detect(doc)
 
 
 @app.post("/profiles/create", response_model=AuthorProfile)

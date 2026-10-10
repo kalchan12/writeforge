@@ -139,3 +139,20 @@ export interface RevisionExecutionResult {
   success: boolean;
   error_message?: string | null;
 }
+
+export interface AISignal {
+  name: string;
+  raw_value: number;
+  sub_score: number;
+  weight: number;
+  description: string;
+}
+
+export interface AIDetectionReport {
+  ai_score: number;
+  ai_score_percent: number;
+  verdict: string;
+  confidence: string;
+  signals: AISignal[];
+  summary: string;
+}
