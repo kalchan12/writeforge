@@ -25,7 +25,7 @@ from rightforge.models import (
     SemanticCoherenceReport,
 )
 from rightforge.profiles import ProfileAggregator, ProfileComparator
-from rightforge.revision import RevisionExecutor, RevisionPlanner
+from rightforge.revision import RevisionExecutor, RevisionPlanner, TextHumanizer
 from rightforge.storage import DatabaseManager
 
 app = FastAPI(
@@ -262,10 +262,15 @@ def execute_revision(request: RevisionExecuteRequest) -> RevisionExecutionResult
     if request.use_mock:
         provider = MockLLMProvider()
     else:
-        provider = OllamaProvider(
+        ollama = OllamaProvider(
             model=request.model,
             base_url=request.endpoint_url,
         )
+        if ollama.is_available():
+            provider = ollama
+        else:
+            # Fallback to local rule-governed TextHumanizer pipeline if Ollama is not running
+            provider = MockLLMProvider()
 
     executor = RevisionExecutor(provider=provider)
     result = executor.execute(

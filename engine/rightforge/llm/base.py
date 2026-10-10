@@ -47,5 +47,12 @@ class MockLLMProvider(BaseLLMProvider):
         if self.canned_response is not None:
             return self.canned_response
 
-        # Default fallback response
-        return "The analytical engine weaves patterns. Mathematical truths require discipline."
+        # Extract text from standard prompt format if present
+        source_text = prompt
+        if "```text" in prompt and "```" in prompt.split("```text", 1)[1]:
+            source_text = prompt.split("```text", 1)[1].split("```", 1)[0].strip()
+
+        from rightforge.revision.humanizer import TextHumanizer
+
+        humanizer = TextHumanizer()
+        return humanizer.humanize(source_text)
