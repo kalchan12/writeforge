@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import AIScoreGauge from "../components/AIScoreGauge";
+import DiffViewer from "../components/DiffViewer";
 import { detectAI, executeRevision, fetchHealth, AIDetectionReport } from "../lib/api";
 import { RevisionExecutionResult } from "../types/api";
 
@@ -14,6 +15,8 @@ export default function Page() {
   
   const [aiReport, setAiReport] = useState<AIDetectionReport | null>(null);
   const [revisionResult, setRevisionResult] = useState<RevisionExecutionResult | null>(null);
+  const [revisedAiReport, setRevisedAiReport] = useState<AIDetectionReport | null>(null);
+  const [diffViewMode, setDiffViewMode] = useState<"side-by-side" | "raw">("side-by-side");
   
   const [error, setError] = useState<string | null>(null);
 
@@ -42,8 +45,20 @@ export default function Page() {
     setHumanizing(true);
     setError(null);
     try {
-      const result = await executeRevision(text, { useMock: true });
+      const [result, origReport] = await Promise.all([
+        executeRevision(text, { useMock: true }),
+        aiReport ? Promise.resolve(aiReport) : detectAI(text).catch(() => null),
+      ]);
       setRevisionResult(result);
+      if (origReport) {
+        setAiReport(origReport);
+      }
+
+      if (result.revised_text) {
+        detectAI(result.revised_text)
+          .then((revReport) => setRevisedAiReport(revReport))
+          .catch(() => setRevisedAiReport(null));
+      }
     } catch (err: any) {
       setError(err.message || "Failed to humanize text.");
     } finally {
@@ -63,7 +78,10 @@ export default function Page() {
     if (revisionResult?.revised_text) {
       setText(revisionResult.revised_text);
       setRevisionResult(null);
-      setAiReport(null); // Optional: clear AI report since text changed
+      setRevisedAiReport(null);
+      if (revisedAiReport) {
+        setAiReport(revisedAiReport);
+      }
     }
   };
 
@@ -151,7 +169,7 @@ export default function Page() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--text-muted)", fontSize: "0.875rem" }}>
             <span>{wordCount} words | {charCount} characters</span>
             <button 
-              onClick={() => { setText(""); setAiReport(null); setRevisionResult(null); }}
+              onClick={() => { setText(""); setAiReport(null); setRevisionResult(null); setRevisedAiReport(null); }}
               style={{
                 background: "none",
                 border: "none",
@@ -313,69 +331,193 @@ export default function Page() {
               padding: "1.5rem",
               display: "flex",
               flexDirection: "column",
-              gap: "1rem"
+              gap: "1.25rem"
             }}>
-              <h3 style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                ✨ Humanized Text
-              </h3>
-              
+              {/* Header with Title and Mode Toggle */}
               <div style={{
-                backgroundColor: "var(--bg-color)",
-                padding: "1rem",
-                borderRadius: "6px",
-                color: "var(--text-muted)",
-                fontSize: "0.9rem",
-                border: "1px solid var(--border-color)",
-                opacity: 0.7
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "0.75rem",
+                borderBottom: "1px solid var(--border-color)",
+                paddingBottom: "0.75rem"
               }}>
-                <div style={{ marginBottom: "0.5rem", fontWeight: "bold", fontSize: "0.8rem", textTransform: "uppercase" }}>Original</div>
-                {revisionResult.original_text}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                  <h3 style={{ margin: 0, fontSize: "1.2rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    ✨ Humanized Comparison
+                  </h3>
+                  <span style={{
+                    fontSize: "0.75rem",
+                    padding: "0.2rem 0.6rem",
+                    borderRadius: "9999px",
+                    backgroundColor: "rgba(52, 211, 153, 0.15)",
+                    color: "var(--success-color)",
+                    fontWeight: 600,
+                    border: "1px solid rgba(52, 211, 153, 0.3)"
+                  }}>
+                    Side-by-Side Live
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", gap: "0.4rem", backgroundColor: "#12151f", padding: "0.25rem", borderRadius: "6px", border: "1px solid var(--border-color)" }}>
+                  <button
+                    onClick={() => setDiffViewMode("side-by-side")}
+                    style={{
+                      padding: "0.3rem 0.65rem",
+                      fontSize: "0.8rem",
+                      borderRadius: "4px",
+                      border: "none",
+                      backgroundColor: diffViewMode === "side-by-side" ? "var(--accent-color)" : "transparent",
+                      color: diffViewMode === "side-by-side" ? "#fff" : "var(--text-muted)",
+                      cursor: "pointer",
+                      fontWeight: diffViewMode === "side-by-side" ? 600 : 400,
+                    }}
+                  >
+                    Side-by-Side Diff
+                  </button>
+                  <button
+                    onClick={() => setDiffViewMode("raw")}
+                    style={{
+                      padding: "0.3rem 0.65rem",
+                      fontSize: "0.8rem",
+                      borderRadius: "4px",
+                      border: "none",
+                      backgroundColor: diffViewMode === "raw" ? "var(--accent-color)" : "transparent",
+                      color: diffViewMode === "raw" ? "#fff" : "var(--text-muted)",
+                      cursor: "pointer",
+                      fontWeight: diffViewMode === "raw" ? 600 : 400,
+                    }}
+                  >
+                    Clean View
+                  </button>
+                </div>
               </div>
 
-              <div style={{
-                backgroundColor: "rgba(52, 211, 153, 0.05)",
-                padding: "1rem",
-                borderRadius: "6px",
-                color: "var(--text-main)",
-                fontSize: "1rem",
-                lineHeight: "1.5",
-                border: "1px solid var(--success-color)"
-              }}>
-                <div style={{ marginBottom: "0.5rem", fontWeight: "bold", fontSize: "0.8rem", color: "var(--success-color)", textTransform: "uppercase" }}>Revised</div>
-                {revisionResult.revised_text}
-              </div>
+              {/* AI Score Shift Impact Pill (if available) */}
+              {(aiReport || revisedAiReport) && (
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "6px",
+                  backgroundColor: "rgba(52, 211, 153, 0.08)",
+                  border: "1px solid rgba(52, 211, 153, 0.25)",
+                  fontSize: "0.85rem",
+                  flexWrap: "wrap",
+                  gap: "0.5rem"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <span style={{ color: "var(--text-muted)" }}>AI Probability:</span>
+                    {aiReport && (
+                      <span style={{ fontWeight: 600, color: aiReport.ai_score_percent > 60 ? "#ef4444" : "#eab308" }}>
+                        {aiReport.ai_score_percent}% (Original)
+                      </span>
+                    )}
+                    <span>&rarr;</span>
+                    {revisedAiReport ? (
+                      <span style={{ fontWeight: 700, color: "var(--success-color)", fontSize: "0.95rem" }}>
+                        {revisedAiReport.ai_score_percent}% ({revisedAiReport.verdict})
+                      </span>
+                    ) : (
+                      <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Calculating...</span>
+                    )}
+                  </div>
+                  {aiReport && revisedAiReport && aiReport.ai_score_percent > revisedAiReport.ai_score_percent && (
+                    <span style={{
+                      fontSize: "0.75rem",
+                      color: "var(--success-color)",
+                      fontWeight: 600,
+                    }}>
+                      &darr; {aiReport.ai_score_percent - revisedAiReport.ai_score_percent}% reduction in AI predictability
+                    </span>
+                  )}
+                </div>
+              )}
 
-              <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
+              {/* Content Comparison View */}
+              {diffViewMode === "side-by-side" ? (
+                <DiffViewer
+                  originalText={revisionResult.original_text}
+                  revisedText={revisionResult.revised_text}
+                />
+              ) : (
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                  gap: "1rem"
+                }}>
+                  <div style={{
+                    backgroundColor: "var(--bg-color)",
+                    padding: "1rem",
+                    borderRadius: "6px",
+                    border: "1px solid var(--border-color)",
+                    fontSize: "0.95rem",
+                    lineHeight: "1.6",
+                    color: "var(--text-muted)",
+                    maxHeight: "360px",
+                    overflowY: "auto",
+                  }}>
+                    <div style={{ marginBottom: "0.5rem", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                      Original Text
+                    </div>
+                    {revisionResult.original_text}
+                  </div>
+
+                  <div style={{
+                    backgroundColor: "rgba(52, 211, 153, 0.05)",
+                    padding: "1rem",
+                    borderRadius: "6px",
+                    border: "1px solid var(--success-color)",
+                    fontSize: "0.95rem",
+                    lineHeight: "1.6",
+                    color: "var(--text-main)",
+                    maxHeight: "360px",
+                    overflowY: "auto",
+                  }}>
+                    <div style={{ marginBottom: "0.5rem", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase", color: "var(--success-color)" }}>
+                      Humanized Text
+                    </div>
+                    {revisionResult.revised_text}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
                 <button
                   onClick={handleCopy}
                   style={{
                     flex: 1,
-                    padding: "0.5rem",
+                    padding: "0.6rem",
                     backgroundColor: copied ? "rgba(52, 211, 153, 0.2)" : "transparent",
                     color: copied ? "var(--success-color)" : "var(--text-main)",
                     border: copied ? "1px solid var(--success-color)" : "1px solid var(--border-color)",
                     borderRadius: "6px",
                     cursor: "pointer",
                     fontSize: "0.9rem",
+                    fontWeight: 600,
                     transition: "all 0.2s"
                   }}
                 >
-                  {copied ? "✓ Copied!" : "📋 Copy Text"}
+                  {copied ? "✓ Copied to Clipboard!" : "📋 Copy Humanized Text"}
                 </button>
                 <button
                   onClick={handleUseRevised}
                   style={{
                     flex: 1,
-                    padding: "0.5rem",
+                    padding: "0.6rem",
                     backgroundColor: "var(--accent-color)",
                     color: "#fff",
                     border: "none",
                     borderRadius: "6px",
                     cursor: "pointer",
-                    fontSize: "0.9rem"
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
                   }}
                 >
-                  ↖️ Use as Input
+                  ↖️ Use as Main Input
                 </button>
               </div>
             </div>
